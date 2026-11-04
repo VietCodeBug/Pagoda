@@ -1,0 +1,132 @@
+{
+  "provider": "Poly Haven",
+  "license": "CC0-1.0",
+  "assets": [
+    {
+      "file": "golden-sky.hdr",
+      "asset": "kloofendal_48d_partly_cloudy_puresky",
+      "source": "https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 5451493,
+      "sha256": "5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198"
+    },
+    {
+      "file": "stone-color.jpg",
+      "asset": "stone_floor",
+      "source": "https://polyhaven.com/a/stone_floor",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 321578,
+      "sha256": "af35a74f3ef23add4975cfeec4e04f83209714d08b4dfeae249519ce3247b077"
+    },
+    {
+      "file": "stone-normal.jpg",
+      "asset": "stone_floor",
+      "source": "https://polyhaven.com/a/stone_floor",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 499950,
+      "sha256": "472eeee68f91e3e1e21e628af24e2648820bb0a07303b8fed565eb88a54edbbb"
+    },
+    {
+      "file": "stone-arm.jpg",
+      "asset": "stone_floor",
+      "source": "https://polyhaven.com/a/stone_floor",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 215922,
+      "sha256": "48874b4413764270398acce465a5d3c1fef143234a9916adfc220277b26b9310"
+    },
+    {
+      "file": "earth-color.jpg",
+      "asset": "aerial_grass_rock",
+      "source": "https://polyhaven.com/a/aerial_grass_rock",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 339464,
+      "sha256": "099f2d0bdb146b60d818a0258ec07c844f8ce40bd746a8273b8b995c177b5a3c"
+    },
+    {
+      "file": "earth-normal.jpg",
+      "asset": "aerial_grass_rock",
+      "source": "https://polyhaven.com/a/aerial_grass_rock",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 676736,
+      "sha256": "f9b8a3e3fbe1bb155cbd5a890ac75bdb029caaec6fc4b8bfb5bcd17a99c9d43b"
+    },
+    {
+      "file": "earth-arm.jpg",
+      "asset": "aerial_grass_rock",
+      "source": "https://polyhaven.com/a/aerial_grass_rock",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 331153,
+      "sha256": "418aad0f8e7fc63a47f3a3ca484bbd4dd99ab255bcfb2c84383b6f8115d5b1bb"
+    },
+    {
+      "file": "moss-color.jpg",
+      "asset": "mossy_cobblestone",
+      "source": "https://polyhaven.com/a/mossy_cobblestone",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 440915,
+      "sha256": "9ac585132a6dd0a968869d5b1989fdcef1e5880a33346dec2d604c1149c54214"
+    },
+    {
+      "file": "moss-normal.jpg",
+      "asset": "mossy_cobblestone",
+      "source": "https://polyhaven.com/a/mossy_cobblestone",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 445439,
+      "sha256": "38192eb4e360c6e55a56e8b0ac0163af8126ab2bdb95488381cbc0d505de82dd"
+    },
+    {
+      "file": "moss-arm.jpg",
+      "asset": "mossy_cobblestone",
+      "source": "https://polyhaven.com/a/mossy_cobblestone",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 273057,
+      "sha256": "5efa7db379eb2121d7f587132cb7d0a6960e6af68e0030a2858c69676bd99444"
+    },
+    {
+      "file": "boulder.glb",
+      "asset": "boulder_01",
+      "source": "https://polyhaven.com/a/boulder_01",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 4056300,
+      "sha256": "d0e2d18c87f6be6f6f50fc8eb804610786ed96f7be37234c3f94f5f5e096a5d7"
+    },
+    {
+      "file": "moss-rocks.glb",
+      "asset": "rock_moss_set_01",
+      "source": "https://polyhaven.com/a/rock_moss_set_01",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 2010292,
+      "sha256": "359e1846cf372ea6816950c9db63034040441962c4701fecd43b3d374d9b8ea2"
+    },
+    {
+      "file": "garden-shrub.glb",
+      "asset": "shrub_04",
+      "source": "https://polyhaven.com/a/shrub_04",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 1190392,
+      "sha256": "018e18b10ae8423c4b3b1775915750cbbc40c0dda7ed7d16eac43ba9a240b501"
+    },
+    {
+      "file": "garden-fern.glb",
+      "asset": "fern_02",
+      "source": "https://polyhaven.com/a/fern_02",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "bytes": 557684,
+      "sha256": "1d74e5642fe01a8a871841c3bae2cbde3224a15e15ba27069fec16e7e3f7c0bb"
+    }
+  ]
+}

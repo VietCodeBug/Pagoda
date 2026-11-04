@@ -1,0 +1,36 @@
+{
+  "textureMaximum": 1024,
+  "compression": "Embedded JPEG/PNG; no remote decoder required",
+  "avatar": {
+    "file": "/assets/avatar.glb",
+    "heightMeters": 1.7,
+    "vertices": 12092,
+    "bones": 32,
+    "clips": [
+      "Walk",
+      "Run",
+      "Attack",
+      "Agree"
+    ],
+    "sourceBytes": 123839744,
+    "outputBytes": 1663236,
+    "note": "The four supplied character exports share one skin. Idle, Sit, Bow and Pray are procedural runtime poses."
+  },
+  "statues": [
+    {
+      "file": "/assets/buddha-center.glb",
+      "sourceBytes": 45498280,
+      "outputBytes": 2082460
+    },
+    {
+      "file": "/assets/buddha-left.glb",
+      "sourceBytes": 49767824,
+      "outputBytes": 2075760
+    },
+    {
+      "file": "/assets/buddha-right.glb",
+      "sourceBytes": 46735940,
+      "outputBytes": 2182632
+    }
+  ]
+}

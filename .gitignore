@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.env
+.env.*
+!.env.example
+.wrangler/
+.vercel/
+*.tsbuildinfo
+test-results/
+artifacts/
+*.log
+# Keep source art locally; deploy the optimized copies under public/assets.
+/*.glb
+/*.mp3

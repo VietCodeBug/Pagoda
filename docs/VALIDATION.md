@@ -1,0 +1,54 @@
+# Kết quả kiểm tra bản local
+
+Ngày 04/11/2026. Node.js 22.20.0 trên Windows. Các lượt đầu dùng SwiftShader để kiểm tra chức năng; lượt kiểm tra chuyển động mới dùng Chrome với GPU. Không dùng giả lập viewport để kết luận hiệu năng trên điện thoại thật.
+
+| Kiểm tra | Kết quả |
+| --- | --- |
+| `pnpm typecheck` | Đạt |
+| `pnpm cf:typecheck` | Đạt |
+| `pnpm test` | 23/23 đạt: phòng, đường đi, storage/range và ranh giới public Realtime |
+| `pnpm build` | Đạt; game, guest/prayer API, asset route và capability route được build |
+| `pnpm smoke` | Đạt với Next local, Neon thật và hai WebSocket client |
+| Wrangler `deploy --dry-run` | Đạt; không deploy |
+| Wrangler local, cổng 1998 | `/health` và room route thật hoạt động; hai client chat/di chuyển/giao đấu đạt |
+| GLB Validator | 4 model gốc tối ưu và 4 model cảnh CC0 mới: không có lỗi |
+| Chrome trên build production cổng 3001 | 8 nhóm kiểm tra UI đạt, không có lỗi trình duyệt |
+| `pnpm smoke:neon` | Hai subscription Neon thật nhận insert/delete; private bị loại; S3 checksum và audio Range đạt |
+| Browser Live SQL trên cổng 3001 | Kết nối trực tiếp báo live, public xuất hiện/xóa tự động, private không xuất hiện |
+
+## Chrome production
+
+Viewport desktop 1440×1000, mobile giả lập 390×844. Hai phiên độc lập cùng kết nối server phòng local cổng 1999.
+
+1. Tải cảnh, model, chọn ngoại hình và vào phòng bằng tên khách.
+2. Xác nhận vị trí thực sự đổi khi giữ W; đổi hướng W/S/A/D liên tục không mất ổn định vật lý.
+3. Ngồi thiền chặn di chuyển; E đứng dậy.
+4. M mở bản đồ; Enter gửi chat qua server và nhận tin trả về.
+5. Chuyển đèn ngày/đêm.
+6. Chạy vào chính điện, E mở lời nguyện, lưu lời nguyện riêng tư vào Neon và thực hiện nghi lễ.
+7. Mobile không tràn ngang; joystick thực sự thay đổi tọa độ nhân vật.
+8. Hai phiên có mặt cùng phòng, số người đồng bộ đúng.
+
+Ảnh trong `artifacts/`: `desktop-entry.png`, `desktop-game.png`, `desktop-night.png`, `map.png`, `incense.png`, `mobile-entry.png`, `mobile-game.png`. Kết quả máy đọc được ở `artifacts/ui-results.json`.
+
+Đã xem ảnh để sửa hai lỗi mà kiểm tra kiểu dữ liệu không phát hiện: capsule nghiêng khi va chạm/chạy và tên bone bị GLTFLoader bỏ dấu `:`. Nhân vật hiện khóa xoay X/Z, giữ xoay Y; pose dựa trên bone đã tải đúng tên. Cần giữ thông số xoay mặc định của Ecctrl, tránh damping quá lớn gây vận tốc góc không hữu hạn.
+
+Bản hình ảnh tiếp theo có bầu trời HDRI có mây 2K, ánh sáng môi trường, mặt đất PBR, model đá/cây quét 3D và cỏ instanced lay theo gió. Asset mới nằm trong `docs/SCENE_ASSETS.md`; dữ liệu asset trên S3 đã tải lại đối chiếu checksum. Ảnh `scene-upgrade-entry.png` và `neon-live-journal.png` ghi lại bản mới. Data API URL đã probe: yêu cầu JWT; Auth vẫn không được bật, SQL/Realtime tiếp tục hoạt động.
+
+## API và dữ liệu
+
+Đã thử tạo/sửa/tải lại hồ sơ, cookie bị sửa/hết hạn, origin khác, avatar/tên không hợp lệ, lời nguyện public/private và hai request gửi đồng thời. Lời nguyện riêng không xuất hiện trên API công khai; cooldown 30 giây áp dụng giữa nhiều request.
+
+Migration chỉ bổ sung `vto_players`, `vto_prayers` và index. Dữ liệu QA được dọn theo đúng UUID đã tạo; giữ nguyên dữ liệu khác.
+
+## Phạm vi còn cần đo riêng
+
+Chưa deploy public, chưa benchmark 20 thiết bị cùng lúc, chưa đo FPS/nhiệt/bộ nhớ trên điện thoại thật. Bài kiểm tra 20 chỗ và từ chối người thứ 21 xác nhận luật phòng, không phải benchmark hiệu năng render. Camera và collision dùng hình đơn giản gần với kiến trúc; clip nghi lễ hiện là pose runtime. Better Auth/account-link, moderation và phục hồi room sau deploy nằm trong roadmap.
+
+## Sửa rung khi di chuyển
+
+Camera theo vị trí được Rapier nội suy để render thay vì tọa độ vật lý thô; phím/khóa nghi lễ chạy trước bước vật lý, camera chạy sau đó và trước Html/render. Camera chỉ làm dịu góc/zoom, không kéo chậm riêng vị trí bám nhân vật. Avatar từ xa chỉ gán vị trí ban đầu một lần, sau đó nội suy giữa các snapshot thay vì bị React đặt lại vị trí mỗi gói 10 Hz.
+
+Cây dùng LOD theo khoảng cách, bóng cây chi tiết dành cho High, số cỏ giảm theo preset. Khi khung hình chậm, renderer hạ DPR có giới hạn và hysteresis; giữ sky/texture và không đổi lựa chọn preset của người chơi. Memo cảnh tránh dựng lại cả thế giới mỗi lần điều chỉnh DPR.
+
+Đo chạy thẳng 5 giây ở 960×640, Medium, Chrome GPU: 295 frame; median 16,7 ms, p95 16,8 ms; không có frame trên 50 ms. Độ lệch bước nameplate tối đa 0,031 pixel trong phép đo. Đây là một cảnh/thiết bị kiểm tra, không phải cam kết 60 FPS ở mọi máy/tải. Dữ liệu: `artifacts/movement-native.json`.

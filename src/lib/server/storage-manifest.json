@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "assets": {
+    "avatar.glb": {
+      "key": "vto/v1/f0eb4e796225a0cbd27805e4bfb32b3cd1de82aff43d3005d53468b69aa369b1/avatar.glb",
+      "sha256": "f0eb4e796225a0cbd27805e4bfb32b3cd1de82aff43d3005d53468b69aa369b1",
+      "bytes": 1663236,
+      "contentType": "model/gltf-binary"
+    },
+    "buddha-center.glb": {
+      "key": "vto/v1/6e831451cdf9b3d7d74052d632cec0ac9ef4a47b93ddaa536bd91dceb34ad952/buddha-center.glb",
+      "sha256": "6e831451cdf9b3d7d74052d632cec0ac9ef4a47b93ddaa536bd91dceb34ad952",
+      "bytes": 2082460,
+      "contentType": "model/gltf-binary"
+    },
+    "buddha-left.glb": {
+      "key": "vto/v1/1793687be8a937aefea436ffd4f93231a87ce9745c8e71df7d7a56b2c849acc6/buddha-left.glb",
+      "sha256": "1793687be8a937aefea436ffd4f93231a87ce9745c8e71df7d7a56b2c849acc6",
+      "bytes": 2075760,
+      "contentType": "model/gltf-binary"
+    },
+    "buddha-right.glb": {
+      "key": "vto/v1/36b94838d75a361aa81e8e1f3c4b4a00aab8b287888eda7e431449351bf8db35/buddha-right.glb",
+      "sha256": "36b94838d75a361aa81e8e1f3c4b4a00aab8b287888eda7e431449351bf8db35",
+      "bytes": 2182632,
+      "contentType": "model/gltf-binary"
+    },
+    "temple-ambient.mp3": {
+      "key": "vto/v1/2aed966eaa32442820369b8cb5dfe966dc75be2017e83ca9b6feafc3f90cd29a/temple-ambient.mp3",
+      "sha256": "2aed966eaa32442820369b8cb5dfe966dc75be2017e83ca9b6feafc3f90cd29a",
+      "bytes": 4308523,
+      "contentType": "audio/mpeg"
+    },
+    "manifest.json": {
+      "key": "vto/v1/0d94701511403c685e52ecf9702a9ebc36286fa967aba81b0c77d81552878dd2/manifest.json",
+      "sha256": "0d94701511403c685e52ecf9702a9ebc36286fa967aba81b0c77d81552878dd2",
+      "bytes": 834,
+      "contentType": "application/json"
+    },
+    "golden-sky.hdr": {
+      "key": "vto/v1/5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198/golden-sky.hdr",
+      "sha256": "5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198",
+      "bytes": 5451493,
+      "contentType": "image/vnd.radiance"
+    },
+    "stone-color.jpg": {
+      "key": "vto/v1/af35a74f3ef23add4975cfeec4e04f83209714d08b4dfeae249519ce3247b077/stone-color.jpg",
+      "sha256": "af35a74f3ef23add4975cfeec4e04f83209714d08b4dfeae249519ce3247b077",
+      "bytes": 321578,
+      "contentType": "image/jpeg"
+    },
+    "stone-normal.jpg": {
+      "key": "vto/v1/472eeee68f91e3e1e21e628af24e2648820bb0a07303b8fed565eb88a54edbbb/stone-normal.jpg",
+      "sha256": "472eeee68f91e3e1e21e628af24e2648820bb0a07303b8fed565eb88a54edbbb",
+      "bytes": 499950,
+      "contentType": "image/jpeg"
+    },
+    "stone-arm.jpg": {
+      "key": "vto/v1/48874b4413764270398acce465a5d3c1fef143234a9916adfc220277b26b9310/stone-arm.jpg",
+      "sha256": "48874b4413764270398acce465a5d3c1fef143234a9916adfc220277b26b9310",
+      "bytes": 215922,
+      "contentType": "image/jpeg"
+    },
+    "earth-color.jpg": {
+      "key": "vto/v1/099f2d0bdb146b60d818a0258ec07c844f8ce40bd746a8273b8b995c177b5a3c/earth-color.jpg",
+      "sha256": "099f2d0bdb146b60d818a0258ec07c844f8ce40bd746a8273b8b995c177b5a3c",
+      "bytes": 339464,
+      "contentType": "image/jpeg"
+    },
+    "earth-normal.jpg": {
+      "key": "vto/v1/f9b8a3e3fbe1bb155cbd5a890ac75bdb029caaec6fc4b8bfb5bcd17a99c9d43b/earth-normal.jpg",
+      "sha256": "f9b8a3e3fbe1bb155cbd5a890ac75bdb029caaec6fc4b8bfb5bcd17a99c9d43b",
+      "bytes": 676736,
+      "contentType": "image/jpeg"
+    },
+    "earth-arm.jpg": {
+      "key": "vto/v1/418aad0f8e7fc63a47f3a3ca484bbd4dd99ab255bcfb2c84383b6f8115d5b1bb/earth-arm.jpg",
+      "sha256": "418aad0f8e7fc63a47f3a3ca484bbd4dd99ab255bcfb2c84383b6f8115d5b1bb",
+      "bytes": 331153,
+      "contentType": "image/jpeg"
+    },
+    "moss-color.jpg": {
+      "key": "vto/v1/9ac585132a6dd0a968869d5b1989fdcef1e5880a33346dec2d604c1149c54214/moss-color.jpg",
+      "sha256": "9ac585132a6dd0a968869d5b1989fdcef1e5880a33346dec2d604c1149c54214",
+      "bytes": 440915,
+      "contentType": "image/jpeg"
+    },
+    "moss-normal.jpg": {
+      "key": "vto/v1/38192eb4e360c6e55a56e8b0ac0163af8126ab2bdb95488381cbc0d505de82dd/moss-normal.jpg",
+      "sha256": "38192eb4e360c6e55a56e8b0ac0163af8126ab2bdb95488381cbc0d505de82dd",
+      "bytes": 445439,
+      "contentType": "image/jpeg"
+    },
+    "moss-arm.jpg": {
+      "key": "vto/v1/5efa7db379eb2121d7f587132cb7d0a6960e6af68e0030a2858c69676bd99444/moss-arm.jpg",
+      "sha256": "5efa7db379eb2121d7f587132cb7d0a6960e6af68e0030a2858c69676bd99444",
+      "bytes": 273057,
+      "contentType": "image/jpeg"
+    },
+    "boulder.glb": {
+      "key": "vto/v1/d0e2d18c87f6be6f6f50fc8eb804610786ed96f7be37234c3f94f5f5e096a5d7/boulder.glb",
+      "sha256": "d0e2d18c87f6be6f6f50fc8eb804610786ed96f7be37234c3f94f5f5e096a5d7",
+      "bytes": 4056300,
+      "contentType": "model/gltf-binary"
+    },
+    "moss-rocks.glb": {
+      "key": "vto/v1/359e1846cf372ea6816950c9db63034040441962c4701fecd43b3d374d9b8ea2/moss-rocks.glb",
+      "sha256": "359e1846cf372ea6816950c9db63034040441962c4701fecd43b3d374d9b8ea2",
+      "bytes": 2010292,
+      "contentType": "model/gltf-binary"
+    },
+    "garden-shrub.glb": {
+      "key": "vto/v1/018e18b10ae8423c4b3b1775915750cbbc40c0dda7ed7d16eac43ba9a240b501/garden-shrub.glb",
+      "sha256": "018e18b10ae8423c4b3b1775915750cbbc40c0dda7ed7d16eac43ba9a240b501",
+      "bytes": 1190392,
+      "contentType": "model/gltf-binary"
+    },
+    "garden-fern.glb": {
+      "key": "vto/v1/1d74e5642fe01a8a871841c3bae2cbde3224a15e15ba27069fec16e7e3f7c0bb/garden-fern.glb",
+      "sha256": "1d74e5642fe01a8a871841c3bae2cbde3224a15e15ba27069fec16e7e3f7c0bb",
+      "bytes": 557684,
+      "contentType": "model/gltf-binary"
+    },
+    "scene-credits.json": {
+      "key": "vto/v1/368be40a5d5e6e670303333fe6f854794f0a281810324a62e4d3b46ee85f904c/scene-credits.json",
+      "sha256": "368be40a5d5e6e670303333fe6f854794f0a281810324a62e4d3b46ee85f904c",
+      "bytes": 4634,
+      "contentType": "application/json"
+    }
+  }
+}
