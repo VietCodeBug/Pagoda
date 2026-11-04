@@ -21,14 +21,18 @@ Giữ giá trị thật trong `.env`/`.env.local` khi chạy local và trong Env
 | --- | --- |
 | `DATABASE_URL` hoặc `NEON_KEY` | Chuỗi kết nối PostgreSQL hiện có |
 | `SESSION_SECRET` | Ký phiên khách của game |
-| `AWS_ENDPOINT_URL_S3` | Endpoint Object Storage của nhánh Neon |
-| `AWS_ACCESS_KEY_ID` | ID credential S3 |
-| `AWS_SECRET_ACCESS_KEY` | Secret S3, chỉ dùng trên server/script upload |
-| `AWS_REGION` | Vùng storage, hiện `us-east-2` |
+| `NEON_STORAGE_ENDPOINT` | Endpoint Object Storage của nhánh Neon |
+| `NEON_STORAGE_ACCESS_KEY_ID` | ID credential S3 |
+| `NEON_STORAGE_SECRET_ACCESS_KEY` | Secret S3, chỉ dùng trên server/script upload |
+| `NEON_STORAGE_REGION` | Vùng storage, hiện `us-east-2` |
 | `NEON_STORAGE_BUCKET` | `pagoda` |
 | `NEON_REALTIME_URL` | Endpoint Live SQL API, dạng `https://…rt.…neon.tech/`; code chuẩn hóa sang `wss:` |
 | `NEON_REALTIME_SECRET` | Secret riêng dùng niêm phong truy vấn Realtime |
 | `NEON_REALTIME_DATABASE` | Tùy chọn; mặc định lấy tên database từ chuỗi PostgreSQL |
+| `NEON_DATA_API_URL`, `NEON_DATA_API_TOKEN` | REST endpoint và JWT tùy chọn; thiếu JWT thì đọc qua SQL |
+| `NEON_AUTH_URL`, `NEON_JWKS_URL` | URL tham khảo; không được gọi, không bật Auth |
+
+Các tên cũ `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` vẫn được hỗ trợ cho môi trường local. Trên Netlify dùng nhóm `NEON_STORAGE_*`: Netlify Functions có biến AWS dành riêng và không cho ghi đè. Chạy `pnpm env:netlify` để tạo file `.env.netlify` có thể import qua UI; file nằm ngoài Git. Xem [deploy Netlify](DEPLOY_NETLIFY.md).
 
 `NEXT_PUBLIC_REALTIME_URL` là URL **server phòng game** đang chạy bằng Node khi phát triển hoặc Cloudflare Worker khi deploy. Giá trị này khác `NEON_REALTIME_URL`, vốn phục vụ thay đổi dữ liệu trong sổ lời nguyện.
 
@@ -54,7 +58,7 @@ File gốc ở thư mục dự án và bản tối ưu local không bị xóa. K
 
 Trình duyệt gọi URL cùng origin `/api/assets/<tên-file>`. Route kiểm tra allowlist, rồi GET trả redirect `307` tới presigned URL của đúng object. Secret S3 không đi vào bundle client. Route hỗ trợ HEAD và một byte range hợp lệ, phù hợp nhạc nền; yêu cầu range sai được từ chối. Alias route cache ngắn vì manifest có thể đổi, còn object có hash trong key có thể cache lâu.
 
-Bucket `pagoda` đã có CORS cho GET/HEAD từ trình duyệt; cấu hình CORS hiện có được giữ nguyên. Cách làm này tránh truyền toàn bộ model/nhạc qua response body của Vercel Function. Tham khảo [download, byte range và presigned URL của Neon](https://neon.com/docs/storage/objects).
+Bucket `pagoda` đã có CORS cho GET/HEAD từ trình duyệt; cấu hình CORS hiện có được giữ nguyên. Cách làm này tránh truyền toàn bộ model/nhạc qua response body của serverless Function. Tham khảo [download, byte range và presigned URL của Neon](https://neon.com/docs/storage/objects).
 
 ## Sổ lời nguyện cập nhật trực tiếp
 
@@ -81,7 +85,7 @@ Neon Realtime đang beta và chưa hỗ trợ RLS; giới hạn dữ liệu bằ
 1. Mở Neon Console, chọn đúng project/nhánh, vào **Postgres database → Realtime**.
 2. Lấy `NEON_REALTIME_URL` và `NEON_REALTIME_SECRET` đang hiển thị, điền vào môi trường server. Secret này khác mật khẩu database, secret S3 và `SESSION_SECRET`.
 3. Nếu Neon CLI đã được đăng nhập và liên kết đúng project, có thể dùng `neon env pull --service realtime` để lấy hai biến. Kiểm tra các giá trị cấu hình khác được giữ đúng sau khi cập nhật file môi trường.
-4. Đặt origin được phép cho Realtime gồm `http://localhost:3000` khi phát triển và origin Vercel chính xác khi phát hành.
+4. Đặt origin được phép cho Realtime gồm `http://localhost:3000` khi phát triển và origin Netlify chính xác khi phát hành.
 
 Ví dụ cấu hình Neon, chỉ thêm dịch vụ Realtime:
 
@@ -93,14 +97,14 @@ export default defineConfig({
     realtime: {
       allowedOrigins: [
         'http://localhost:3000',
-        'https://TEN-GAME.vercel.app',
+        'https://TEN-GAME.netlify.app',
       ],
     },
   },
 });
 ```
 
-Thay origin mẫu bằng domain thật. `neon deploy` trong thư mục đã liên kết đúng project áp dụng cấu hình Neon; đây là bước riêng với deploy Next.js lên Vercel. Không có `auth: true` trong cấu hình trên.
+Thay origin mẫu bằng domain thật. `neon deploy` trong thư mục đã liên kết đúng project áp dụng cấu hình Neon; đây là bước riêng với deploy Next.js lên Netlify. Không có `auth: true` trong cấu hình trên.
 
 Endpoint Realtime đã được cung cấp cho nhánh hiện tại; không cần bật lại dịch vụ để tích hợp code. Việc bật Realtime mới trên một project có thể thay đổi `wal_level` và ngắt compute đang chạy, nên đối chiếu trạng thái nhánh trước khi cấu hình. Xem [Quickstart](https://neon.com/docs/realtime/quickstart) và [Overview](https://neon.com/docs/realtime/overview).
 

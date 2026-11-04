@@ -7,7 +7,7 @@ Phiên bản 0.1 · 04/11/2026. Đọc cùng `GDD.md`, `ROADMAP.md` và README �
 ```mermaid
 flowchart LR
   B[Trình duyệt<br/>R3F + Three + Ecctrl + Rapier]
-  W[Next.js<br/>Vercel / chạy local]
+  W[Next.js<br/>Netlify / chạy local]
   R[Room WebSocket<br/>PartyServer + Cloudflare DO]
   D[(Neon PostgreSQL<br/>Drizzle)]
   B -->|HTTP: khách, lời nguyện| W
@@ -151,7 +151,7 @@ Các biến chính:
 - `NEXT_PUBLIC_REALTIME_URL`: URL WebSocket public, không chứa secret.
 - `ALLOWED_ORIGIN`: origin web được phép kết nối Worker.
 
-Deploy web lên Vercel và realtime lên Cloudflare là hai bước riêng. Sau khi có Worker URL, cấu hình `NEXT_PUBLIC_REALTIME_URL` rồi build/deploy web. Cấu hình origin Worker trùng URL web production. HTTPS web phải dùng WSS. Không commit `.env` hoặc dán giá trị secret vào log.
+Deploy web lên Netlify và realtime lên Cloudflare là hai bước riêng. `netlify.toml` dùng `pnpm build` và `.next`, giữ API/cookie trên Next.js adapter. Import `.env.netlify` qua UI với scope Builds và Functions; dùng nhóm `NEON_STORAGE_*` thay tên AWS dành riêng. Sau khi có Worker URL, cấu hình `NEXT_PUBLIC_REALTIME_URL` rồi build/deploy web. Cấu hình origin Worker và Neon Realtime trùng URL web production. HTTPS web phải dùng WSS. Không commit `.env` hoặc dán giá trị secret vào log. Xem [hướng dẫn Netlify](DEPLOY_NETLIFY.md).
 
 Worker phiên bản đầu giữ vòng tick khi phòng đang hoạt động (`hibernate = false`), dừng timer sau khi người cuối cùng rời phòng. Snapshot chỉ phát khi trạng thái đổi, tối đa khoảng 10 Hz. Mục tiêu gần 0 đồng phụ thuộc hạn mức, thời gian online, băng thông model và số kết nối. Tối ưu tiếp theo là hibernation sau khi có số đo.
 

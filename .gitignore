@@ -5,6 +5,7 @@ node_modules/
 !.env.example
 .wrangler/
 .vercel/
+.netlify/
 *.tsbuildinfo
 test-results/
 artifacts/

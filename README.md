@@ -56,9 +56,10 @@ Dùng `.env.example` để tham khảo, giữ thông tin thật trong `.env`/`.e
 | `SESSION_SECRET` | Server Next.js; ít nhất 32 ký tự ngẫu nhiên. Bắt buộc khi chạy production. |
 | `NEXT_PUBLIC_REALTIME_URL` | URL gốc server phòng: local `ws://localhost:1999`, production `wss://…workers.dev`. |
 | `ALLOWED_ORIGIN` | Worker Cloudflare; origin chính xác của frontend, gồm `https://`. |
-| `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `NEON_STORAGE_BUCKET` | Server/script dùng Neon Object Storage, bucket hiện tại `pagoda`. |
+| `NEON_STORAGE_ENDPOINT`, `NEON_STORAGE_ACCESS_KEY_ID`, `NEON_STORAGE_SECRET_ACCESS_KEY`, `NEON_STORAGE_REGION`, `NEON_STORAGE_BUCKET` | Server/script dùng Neon Object Storage, bucket hiện tại `pagoda`. Code vẫn hỗ trợ tên `AWS_*` cũ khi chạy local. |
 | `NEON_REALTIME_URL`, `NEON_REALTIME_SECRET` | Server niêm phong truy vấn công khai; client nhận quyền đọc có hạn, không nhận secret. |
 | `NEON_DATA_API_URL`, `NEON_DATA_API_TOKEN` | Tùy chọn PostgREST. Khi chưa có JWT, tiếp tục đọc qua SQL; không tự bật Auth. |
+| `NEON_AUTH_URL`, `NEON_JWKS_URL` | URL tham khảo có tên biến rõ ràng; chưa được sử dụng và không kích hoạt Auth. |
 
 ```powershell
 pnpm db:migrate
@@ -71,7 +72,7 @@ Migration bổ sung bảng/view có tiền tố `vto_`. View `vto_public_prayers
 ## Kiểm tra
 
 ```powershell
-pnpm check          # TypeScript web + Worker và 23 bài kiểm tra logic
+pnpm check          # TypeScript web + Worker và các bài kiểm tra logic
 pnpm build          # Build frontend production
 pnpm smoke          # Cần pnpm dev đang chạy; kiểm tra API/Neon và hai WebSocket client
 pnpm test:ui        # Cần pnpm dev + Chrome đã cài; ảnh kết quả trong artifacts/
@@ -84,13 +85,15 @@ pnpm exec wrangler deploy --dry-run
 
 `test:ui` mặc định dùng GPU của Chrome. Khi cần kiểm tra trong môi trường không có GPU, đặt `SMOKE_SOFTWARE_RENDERER=1`; thời gian frame khi render bằng CPU không đại diện cho máy chơi thật. Game tự hạ độ phân giải render khi thiếu FPS và dùng cây đơn giản ở xa; Medium/High vẫn giữ asset chi tiết khi lại gần.
 
-## Deploy
+## Deploy Netlify
 
-1. Đưa mã nguồn cùng `public/assets` lên GitHub. Vercel chạy `pnpm build` với framework Next.js; không chạy server Node WebSocket trong frontend host.
-2. Cấu hình `DATABASE_URL`, `SESSION_SECRET`, các biến S3 và `NEON_REALTIME_URL`/`NEON_REALTIME_SECRET` trên Vercel. Xem [hướng dẫn Neon](docs/NEON_SERVICES.md).
-3. Trong `wrangler.jsonc`, thêm `vars: { "ALLOWED_ORIGIN": "https://TEN-SITE.vercel.app" }` rồi chạy `pnpm deploy:realtime` sau khi đăng nhập Cloudflare.
-4. Đặt `NEXT_PUBLIC_REALTIME_URL=wss://TEN-WORKER.TEN-ACCOUNT.workers.dev` trên Vercel và build lại. Không thêm `/parties/…`; client tự tạo đường dẫn theo phòng.
-5. Thử hai trình duyệt qua HTTPS, chat, đổi phòng, nghi lễ và giao đấu trước khi chia sẻ công khai.
+1. Chạy `pnpm env:netlify` để tạo `.env.netlify` từ cấu hình local. File có tên biến hợp lệ để import, không chứa dòng URL đứng riêng và không được commit.
+2. Đưa mã nguồn cùng `public/assets` lên GitHub, kết nối repo với Netlify. `netlify.toml` đã cấu hình `pnpm build` và publish `.next`; Netlify tự dùng adapter Next.js.
+3. Import `.env.netlify` trong **Project configuration → Environment variables**, giữ **All scopes** hoặc bao gồm **Builds + Functions**, rồi deploy.
+4. Cấu hình Worker `ALLOWED_ORIGIN=https://TEN-GAME.netlify.app`, chạy `pnpm deploy:realtime` sau khi đăng nhập Cloudflare. Đặt URL Worker thật dạng `wss://…workers.dev` vào `NEXT_PUBLIC_REALTIME_URL` trên Netlify và deploy lại.
+5. Thêm domain Netlify vào allowed origins của Neon Realtime. Thử hai trình duyệt cùng phòng trước khi chia sẻ công khai.
+
+Xem [hướng dẫn Netlify từng bước](docs/DEPLOY_NETLIFY.md), gồm tên biến, import env, server multiplayer và xử lý lỗi. Trên Netlify dùng `NEON_STORAGE_*` thay các biến AWS dành riêng. URL Neon Auth/JWKS được đặt tên nhưng game vẫn đăng nhập bằng khách.
 
 Chưa deploy hay tạo tài nguyên trả phí. Mục tiêu chi phí thấp phụ thuộc hạn mức và số người thực tế; không có cam kết 0đ ở mọi tải. Worker dùng phòng đang hoạt động không hibernate, dừng timer khi phòng hết người. Cần theo dõi usage Cloudflare trước khi mở rộng.
 
@@ -101,6 +104,7 @@ Chưa deploy hay tạo tài nguyên trả phí. Mục tiêu chi phí thấp ph�
 - [Roadmap](docs/ROADMAP.md): module, phụ thuộc, tiêu chí nghiệm thu và backlog.
 - [Kết quả kiểm tra](docs/VALIDATION.md): các kiểm tra đã chạy, ảnh QA và giới hạn chưa đo.
 - [Dịch vụ Neon](docs/NEON_SERVICES.md): S3, Realtime, Data API và ranh giới với server phòng.
+- [Deploy Netlify](docs/DEPLOY_NETLIFY.md): GitHub, file import env, Netlify và Cloudflare multiplayer.
 - [Asset hình ảnh](docs/SCENE_ASSETS.md): nguồn, giấy phép, cách tái tạo và ngân sách tải.
 
 ```text

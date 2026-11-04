@@ -1,0 +1,86 @@
+# Đưa game lên Netlify
+
+Web Next.js/API chạy trên Netlify; server phòng game chạy trên Cloudflare; database, asset và sổ lời nguyện tiếp tục dùng Neon. Bạn bè mở link HTTPS của Netlify để chơi, không cần máy phát triển chạy liên tục.
+
+## 1. Tạo file env để import
+
+Mọi dòng cấu hình phải có dạng `TEN_BIEN=gia_tri`. Dòng chỉ chứa URL không được Netlify nhận thành biến. Chuỗi PostgreSQL kết thúc ở phần tham số URL, không thêm dấu `;` như câu lệnh SQL.
+
+```powershell
+pnpm env:netlify
+pnpm env:check --file .env.netlify
+```
+
+Lệnh đầu đọc `.env` rồi `.env.local`, chuẩn hóa tên biến và tạo `.env.netlify` ở gốc dự án. File này chứa credential thật, chỉ dùng để import; `.gitignore` đã loại khỏi Git. Các giá trị còn thiếu được báo bằng tên biến, không in secret ra console.
+
+| Nội dung | Tên biến dùng khi deploy |
+| --- | --- |
+| PostgreSQL URL | `DATABASE_URL` (`NEON_KEY` cũ vẫn được hỗ trợ) |
+| Khóa ký phiên khách | `SESSION_SECRET` |
+| S3 endpoint | `NEON_STORAGE_ENDPOINT` |
+| S3 access key | `NEON_STORAGE_ACCESS_KEY_ID` |
+| S3 secret key | `NEON_STORAGE_SECRET_ACCESS_KEY` |
+| Vùng và bucket | `NEON_STORAGE_REGION`, `NEON_STORAGE_BUCKET` |
+| Realtime SQL endpoint và secret | `NEON_REALTIME_URL`, `NEON_REALTIME_SECRET` |
+| REST endpoint | `NEON_DATA_API_URL` |
+| Auth/JWKS endpoint, chỉ lưu tham khảo | `NEON_AUTH_URL`, `NEON_JWKS_URL` |
+| WebSocket server phòng game | `NEXT_PUBLIC_REALTIME_URL` |
+
+Code vẫn đọc tên `AWS_*` cũ khi chạy local; trên Netlify dùng nhóm `NEON_STORAGE_*` để tránh các biến AWS được nền tảng giữ riêng. Các [biến AWS dành riêng là chỉ đọc trong Netlify Functions](https://docs.netlify.com/build/functions/environment-variables/).
+
+`NEON_REALTIME_URL` phục vụ sổ lời nguyện, khác với server phòng game. `NEON_AUTH_URL`/`NEON_JWKS_URL` không kích hoạt đăng nhập Neon; game tiếp tục dùng khách. Data API chỉ được sử dụng khi có thêm `NEON_DATA_API_TOKEN` hợp lệ; thiếu token thì ứng dụng vẫn đọc qua PostgreSQL.
+
+## 2. Kết nối GitHub với Netlify
+
+1. Đưa mã nguồn, `public/assets`, manifest storage và lockfile lên repo GitHub. Giữ `.env`, `.env.local`, `.env.netlify`, `.next`, `.netlify` và `node_modules` ngoài Git. Thay các credential đã được chia sẻ trước khi phát hành công khai.
+2. Trong Netlify, chọn thêm project từ Git, kết nối GitHub rồi chọn repo.
+3. `netlify.toml` đã đặt **Build command: `pnpm build`**, **Publish directory: `.next`**. Base directory để gốc repo. `.nvmrc` chọn Node.js 22; `packageManager` trong `package.json` chọn phiên bản pnpm.
+4. Vào **Project configuration → Environment variables → Import from a .env file**, import `.env.netlify`. Để mặc định **All scopes**; nếu có chọn scope thì phải bao gồm **Builds** và **Functions**. Chọn giá trị cho production hoặc cùng giá trị cho các context bạn sử dụng.
+5. Deploy, lấy domain cố định dạng `https://TEN-GAME.netlify.app`.
+
+Netlify tự cung cấp adapter Next.js/OpenNext, gồm API route và cookie phía server. Giữ Next.js hiện tại; không đổi thành static export, không chọn thư mục `out`, không thêm redirect SPA `/* → /index.html`. [Next.js trên Netlify](https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/)
+
+Secret phải được import qua UI/CLI, không đặt trong `netlify.toml`: biến khai báo ở file TOML chỉ dành cho build, không có sẵn cho Functions lúc chạy. Mỗi lần sửa env phải deploy lại; `NEXT_PUBLIC_REALTIME_URL` được đóng vào client lúc build. [Import env](https://docs.netlify.com/build/environment-variables/get-started/), [scope của Functions](https://docs.netlify.com/build/functions/environment-variables/)
+
+## 3. Bật multiplayer qua Cloudflare
+
+Trước khi có Worker URL, có thể deploy web để kiểm tra cảnh/Neon; người chơi chưa kết nối được cùng một phòng game. Không dùng `localhost:1999` trong bản public.
+
+1. Thêm origin Netlify thật vào `wrangler.jsonc`:
+
+   ```json
+   "vars": { "ALLOWED_ORIGIN": "https://TEN-GAME.netlify.app" }
+   ```
+
+2. Đăng nhập và deploy server phòng:
+
+   ```powershell
+   pnpm exec wrangler login
+   pnpm deploy:realtime
+   ```
+
+3. Lấy Worker URL mà Wrangler trả về, đổi `https://` thành `wss://`, rồi đặt `NEXT_PUBLIC_REALTIME_URL` trên Netlify. Dùng URL gốc, không thêm `/parties/temple/...`. Ví dụ dạng URL: `wss://TEN-WORKER.TEN-ACCOUNT.workers.dev`.
+4. Thêm `https://TEN-GAME.netlify.app` vào allowed origins của **Neon Realtime** theo [hướng dẫn Neon](NEON_SERVICES.md#lấy-realtime-secret-và-cho-phép-origin). Domain này phải trùng origin mà trình duyệt đang mở. Nếu đổi domain chính hoặc dùng custom domain, cập nhật cả Worker và Neon.
+5. Deploy lại Netlify. Có thể tái tạo và kiểm tra file import bằng Worker URL thật:
+
+   ```powershell
+   pnpm env:netlify --room-url wss://TEN-WORKER.TEN-ACCOUNT.workers.dev
+   pnpm env:check --file .env.netlify --require-multiplayer
+   ```
+
+Lệnh kiểm tra env xác nhận cấu hình local, không thay thế việc deploy và kiểm tra kết nối thực tế.
+
+## 4. Kiểm tra link trước khi gửi bạn bè
+
+Mở hai trình duyệt ở cùng domain Netlify, chọn cùng phòng. Xác nhận cả hai thấy nhau di chuyển, chat và emote; gửi lời nguyện công khai để kiểm tra Realtime, gửi lời riêng để kiểm tra quyền riêng tư; tải model, nghe nhạc và thử joystick trên điện thoại. Kiểm tra `/api/guest` lưu được hồ sơ, không chạy chế độ dữ liệu bộ nhớ.
+
+| Hiện tượng | Cần kiểm tra |
+| --- | --- |
+| Import env báo tên không hợp lệ | Không dùng dòng URL đứng riêng; import `.env.netlify`, không dùng tên `AWS_*` |
+| Web lên nhưng không lưu được hồ sơ | `DATABASE_URL`, `SESSION_SECRET` và Functions scope |
+| Model từ storage không tải | Đủ nhóm `NEON_STORAGE_*`; endpoint, region và bucket đúng |
+| Chơi một mình, không thấy nhau | Worker đã deploy, URL `wss://` đúng, `ALLOWED_ORIGIN` đúng domain, web đã build lại |
+| Lời nguyện có sẵn nhưng không live | Secret Realtime và allowed origins của Neon |
+| REST endpoint yêu cầu JWT | Giữ SQL fallback; không cần bật Auth cho bản hiện tại |
+
+Cấu hình trong repo chỉ chuẩn bị cho deploy. Repo, tài khoản host, domain và Worker thật phải được liên kết trước khi có thể xác nhận game đã online.

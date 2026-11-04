@@ -21,7 +21,9 @@
     "assets:scene": "node scripts/fetch-scene-assets.mjs",
     "storage:upload": "tsx scripts/upload-assets.ts",
     "realtime:check": "tsx scripts/setup-realtime.ts --probe",
-    "smoke:neon": "tsx scripts/smoke-neon.ts"
+    "smoke:neon": "tsx scripts/smoke-neon.ts",
+    "env:netlify": "node scripts/netlify-env.mjs export",
+    "env:check": "node scripts/netlify-env.mjs check"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",

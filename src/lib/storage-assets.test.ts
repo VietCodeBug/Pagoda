@@ -11,8 +11,25 @@ describe('storage asset boundary', () => {
   });
   it('separates absent storage from broken configuration', () => {
     expect(readStorageConfig({})).toBeNull();
+    expect(readStorageConfig({ AWS_REGION: 'us-west-2', AWS_ACCESS_KEY_ID: 'host-role', AWS_SECRET_ACCESS_KEY: 'host-secret' })).toBeNull();
     expect(() => readStorageConfig({ AWS_ENDPOINT_URL_S3: 'https://example.invalid' })).toThrow('Missing storage configuration');
+    expect(() => readStorageConfig({ NEON_STORAGE_ENDPOINT: 'https://example.invalid' })).toThrow('NEON_STORAGE_ACCESS_KEY_ID');
     expect(() => readStorageConfig({ AWS_ENDPOINT_URL_S3: 'http://example.invalid', AWS_ACCESS_KEY_ID: 'test', AWS_SECRET_ACCESS_KEY: 'test', NEON_STORAGE_BUCKET: 'pagoda' })).toThrow('HTTPS origin');
+  });
+  it('prefers dedicated storage variables over host AWS credentials', () => {
+    expect(readStorageConfig({
+      NEON_STORAGE_ENDPOINT: ' https://storage.example.invalid/ ', NEON_STORAGE_ACCESS_KEY_ID: 'neon-key', NEON_STORAGE_SECRET_ACCESS_KEY: 'neon-secret', NEON_STORAGE_REGION: 'us-east-2', NEON_STORAGE_BUCKET: 'pagoda',
+      AWS_ENDPOINT_URL_S3: 'https://other.example.invalid', AWS_ACCESS_KEY_ID: 'host-role', AWS_SECRET_ACCESS_KEY: 'host-secret', AWS_REGION: 'us-west-2',
+    })).toEqual({ endpoint: 'https://storage.example.invalid', accessKeyId: 'neon-key', secretAccessKey: 'neon-secret', region: 'us-east-2', bucket: 'pagoda' });
+  });
+  it('does not use a provider-injected Lambda region for dedicated Neon storage', () => {
+    const dedicated = { NEON_STORAGE_ENDPOINT: 'https://storage.example.invalid', NEON_STORAGE_ACCESS_KEY_ID: 'neon-key', NEON_STORAGE_SECRET_ACCESS_KEY: 'neon-secret', NEON_STORAGE_BUCKET: 'pagoda', AWS_REGION: 'us-west-2' };
+    expect(readStorageConfig(dedicated)?.region).toBe('us-east-2');
+    expect(readStorageConfig({ ...dedicated, NEON_STORAGE_REGION: 'eu-central-1' })?.region).toBe('eu-central-1');
+  });
+  it('keeps legacy AWS storage variables usable for existing local installs', () => {
+    expect(readStorageConfig({ AWS_ENDPOINT_URL_S3: 'https://legacy.example.invalid', AWS_ACCESS_KEY_ID: 'legacy-key', AWS_SECRET_ACCESS_KEY: 'legacy-secret', AWS_REGION: 'eu-central-1', NEON_STORAGE_BUCKET: 'pagoda' }))
+      .toEqual({ endpoint: 'https://legacy.example.invalid', accessKeyId: 'legacy-key', secretAccessKey: 'legacy-secret', region: 'eu-central-1', bucket: 'pagoda' });
   });
   it('uses a content address rather than overwriting a mutable filename', () => {
     const first = storageObjectKey('avatar.glb', 'a'.repeat(64));

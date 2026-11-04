@@ -28,22 +28,28 @@ export type StorageConfig = {
 
 /** No storage configuration means local assets; partial configuration is an error. */
 export function readStorageConfig(env: Record<string, string | undefined>): StorageConfig | null {
-  if (!env.AWS_ENDPOINT_URL_S3 && !env.NEON_STORAGE_BUCKET) return null;
-  const required = ['AWS_ENDPOINT_URL_S3', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'NEON_STORAGE_BUCKET'] as const;
-  const missing = required.filter((key) => !env[key]?.trim());
+  const endpointValue = env.NEON_STORAGE_ENDPOINT?.trim() || env.AWS_ENDPOINT_URL_S3?.trim();
+  const bucket = env.NEON_STORAGE_BUCKET?.trim();
+  // AWS_* is reserved/injected by some hosts. Dedicated names win, while old local env files still work.
+  const accessKeyId = env.NEON_STORAGE_ACCESS_KEY_ID?.trim() || env.AWS_ACCESS_KEY_ID?.trim();
+  const secretAccessKey = env.NEON_STORAGE_SECRET_ACCESS_KEY?.trim() || env.AWS_SECRET_ACCESS_KEY?.trim();
+  if (!endpointValue && !bucket) return null;
+  const required = { NEON_STORAGE_ENDPOINT: endpointValue, NEON_STORAGE_ACCESS_KEY_ID: accessKeyId, NEON_STORAGE_SECRET_ACCESS_KEY: secretAccessKey, NEON_STORAGE_BUCKET: bucket };
+  const missing = Object.entries(required).filter(([, value]) => !value).map(([key]) => key);
   if (missing.length) throw new Error(`Missing storage configuration: ${missing.join(', ')}`);
-  const endpoint = new URL(env.AWS_ENDPOINT_URL_S3!);
+  const endpoint = new URL(endpointValue!);
   if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash || endpoint.pathname !== '/') {
-    throw new Error('AWS_ENDPOINT_URL_S3 must be an HTTPS origin.');
+    throw new Error('NEON_STORAGE_ENDPOINT must be an HTTPS origin.');
   }
-  const bucket = env.NEON_STORAGE_BUCKET!.trim();
-  if (!/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(bucket)) throw new Error('Invalid storage bucket name.');
+  if (!/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(bucket!)) throw new Error('Invalid storage bucket name.');
+  const dedicatedConfig = Boolean(env.NEON_STORAGE_ENDPOINT?.trim() || env.NEON_STORAGE_ACCESS_KEY_ID?.trim() || env.NEON_STORAGE_SECRET_ACCESS_KEY?.trim());
   return {
     endpoint: endpoint.origin,
-    region: env.AWS_REGION?.trim() || 'us-east-2',
-    bucket,
-    accessKeyId: env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY!,
+    // A host's Lambda region is unrelated to the Neon storage region.
+    region: env.NEON_STORAGE_REGION?.trim() || (!dedicatedConfig && env.AWS_REGION?.trim()) || 'us-east-2',
+    bucket: bucket!,
+    accessKeyId: accessKeyId!,
+    secretAccessKey: secretAccessKey!,
   };
 }
 

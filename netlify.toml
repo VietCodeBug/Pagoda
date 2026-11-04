@@ -1,0 +1,11 @@
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  # package.json pins pnpm; .nvmrc selects Node.js 22.
+  PNPM_FLAGS = "--shamefully-hoist --frozen-lockfile"
+
+# Netlify installs its Next.js/OpenNext adapter automatically.
+# Set application secrets in Netlify Environment Variables, including Functions.
+# The game-room WebSocket server is deployed separately with Wrangler.

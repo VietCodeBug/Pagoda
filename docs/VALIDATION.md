@@ -6,7 +6,7 @@ Ngày 04/11/2026. Node.js 22.20.0 trên Windows. Các lượt đầu dùng Swift
 | --- | --- |
 | `pnpm typecheck` | Đạt |
 | `pnpm cf:typecheck` | Đạt |
-| `pnpm test` | 23/23 đạt: phòng, đường đi, storage/range và ranh giới public Realtime |
+| `pnpm test` | 34/34 đạt: phòng, đường đi, storage/range, public Realtime và chuẩn hóa env Netlify |
 | `pnpm build` | Đạt; game, guest/prayer API, asset route và capability route được build |
 | `pnpm smoke` | Đạt với Next local, Neon thật và hai WebSocket client |
 | Wrangler `deploy --dry-run` | Đạt; không deploy |
@@ -40,6 +40,14 @@ Bản hình ảnh tiếp theo có bầu trời HDRI có mây 2K, ánh sáng môi
 Đã thử tạo/sửa/tải lại hồ sơ, cookie bị sửa/hết hạn, origin khác, avatar/tên không hợp lệ, lời nguyện public/private và hai request gửi đồng thời. Lời nguyện riêng không xuất hiện trên API công khai; cooldown 30 giây áp dụng giữa nhiều request.
 
 Migration chỉ bổ sung `vto_players`, `vto_prayers` và index. Dữ liệu QA được dọn theo đúng UUID đã tạo; giữ nguyên dữ liệu khác.
+
+## Chuẩn bị Netlify
+
+`pnpm env:netlify` đã tạo `.env.netlify` với 12 biến có giá trị; các dòng URL cũ được đặt tên, PostgreSQL bỏ dấu chấm phẩy cuối, storage dùng `NEON_STORAGE_*` để tránh biến AWS dành riêng. `pnpm env:check --file .env.netlify` đạt kiểm tra offline. Chạy lại lệnh export giữ nguyên session secret và Worker URL đã cấu hình; không in credential.
+
+`pnpm build`, TypeScript web/Worker và 34 bài kiểm tra đều đạt. Dùng chính `.env.netlify` để kết nối PostgreSQL `SELECT 1`, S3 HEAD xác nhận kích thước avatar và Neon Realtime báo live. Phép thử S3 cố ý gán AWS credential/region giả của nền tảng; cấu hình Neon có tên riêng vẫn được ưu tiên. Build production local nạp file import đã qua API smoke và hai client WebSocket; dữ liệu QA được dọn. Quét bundle client không tìm thấy credential local.
+
+Chưa deploy hay chạy kiểm tra trên hạ tầng Netlify. `NEXT_PUBLIC_REALTIME_URL` còn trống và được cảnh báo rõ; cần URL Worker public để bật multiplayer. Data API chưa có JWT nên tiếp tục dùng PostgreSQL. Auth/JWKS chỉ lưu URL tham khảo, không kích hoạt đăng nhập.
 
 ## Phạm vi còn cần đo riêng
 

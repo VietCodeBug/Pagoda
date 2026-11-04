@@ -1,4 +1,4 @@
-/** Upload only the six application assets; preserve all other bucket objects. */
+/** Upload only allowlisted application assets; preserve all other bucket objects. */
 import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -7,17 +7,17 @@ import {
   S3Client, ListBucketsCommand, CreateBucketCommand, HeadBucketCommand,
   HeadObjectCommand, PutObjectCommand, GetObjectCommand,
 } from '@aws-sdk/client-s3';
-import { STORAGE_ASSET_NAMES, assetContentType, storageObjectKey, type StoredAsset } from '../src/lib/storage-assets';
+import { STORAGE_ASSET_NAMES, assetContentType, readStorageConfig, storageObjectKey, type StoredAsset } from '../src/lib/storage-assets';
 
 config({ path: '.env', quiet: true });
 config({ path: '.env.local', override: true, quiet: true });
 const root = process.cwd();
-const required = ['AWS_ENDPOINT_URL_S3', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'];
-if (required.some((key) => !process.env[key])) throw new Error('Configure the server-only AWS storage variables first.');
+// Bucket discovery below still works when one has not been chosen; all credentials use runtime's resolver.
+const storage = readStorageConfig({ ...process.env, NEON_STORAGE_BUCKET: process.env.NEON_STORAGE_BUCKET?.trim() || 'virtual-temple-assets' })!;
 const client = new S3Client({
-  endpoint: process.env.AWS_ENDPOINT_URL_S3,
-  region: process.env.AWS_REGION || 'us-east-2',
-  credentials: { accessKeyId: process.env.AWS_ACCESS_KEY_ID!, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY! },
+  endpoint: storage.endpoint,
+  region: storage.region,
+  credentials: { accessKeyId: storage.accessKeyId, secretAccessKey: storage.secretAccessKey },
   forcePathStyle: true,
   requestChecksumCalculation: 'WHEN_REQUIRED',
   responseChecksumValidation: 'WHEN_REQUIRED',
@@ -30,7 +30,7 @@ function isMissing(error: unknown) {
 }
 
 async function run() {
-  let bucket = process.env.NEON_STORAGE_BUCKET;
+  let bucket = process.env.NEON_STORAGE_BUCKET?.trim();
   if (!bucket) {
     const listed = await client.send(new ListBucketsCommand({}));
     const available = listed.Buckets?.flatMap((item) => item.Name ? [item.Name] : []) || [];

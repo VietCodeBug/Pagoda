@@ -110,7 +110,7 @@ Chỉ công bố bản public sau khi:
 - Production secret/origin/WSS cấu hình đúng; `.env` không có trong artifact public.
 - Các kịch bản một người, hai người, phòng tách biệt, combat và riêng tư đều có kết quả.
 - Đo FPS trên ít nhất một desktop và một điện thoại mục tiêu; ghi cấu hình thiết bị.
-- Theo dõi hạn mức Vercel, Cloudflare và Neon; không coi mục tiêu0đ là cam kết.
+- Theo dõi hạn mức Netlify, Cloudflare và Neon; không coi mục tiêu0đ là cam kết.
 - Có cách xem lỗi, khóa spam, và quay lại bản deploy trước khi có sự cố.
 
-Bản bàn giao local không tự đồng nghĩa đã deploy Vercel/Cloudflare hoặc đã nghiệm thu đủ20 avatar trên mobile.
+Bản bàn giao local không tự đồng nghĩa đã deploy Netlify/Cloudflare hoặc đã nghiệm thu đủ20 avatar trên mobile.
