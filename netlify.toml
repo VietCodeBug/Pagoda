@@ -6,6 +6,14 @@
   # package.json pins pnpm; .nvmrc selects Node.js 22.
   PNPM_FLAGS = "--shamefully-hoist --frozen-lockfile"
 
-# Netlify installs its Next.js/OpenNext adapter automatically.
+# Run the Next.js adapter explicitly, even if framework detection is disabled.
+# Keep it unpinned so Netlify supplies the current compatible adapter.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Refuse to publish a raw .next directory without the API handler and assets.
+[[plugins]]
+  package = "./plugins/verify-next-output"
+
 # Set application secrets in Netlify Environment Variables, including Functions.
 # The game-room WebSocket server is deployed separately with Wrangler.

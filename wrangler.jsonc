@@ -3,6 +3,7 @@
   "name": "virtual-temple-realtime",
   "main": "server/worker.ts",
   "compatibility_date": "2026-06-01",
+  "vars": { "ALLOWED_ORIGIN": "https://bespoke-arithmetic-045314.netlify.app" },
   "durable_objects": { "bindings": [{ "name": "Temple", "class_name": "Temple" }] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Temple"] }]
 }

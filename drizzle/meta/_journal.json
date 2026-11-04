@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793767474340,
+      "tag": "0000_virtual_temple",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793767474341,
+      "tag": "0001_public_prayer_api",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793767474342,
+      "tag": "0002_restore_validation",
+      "breakpoints": true
+    }
+  ]
+}

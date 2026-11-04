@@ -8,6 +8,7 @@
     "dev:web": "next dev --hostname 0.0.0.0",
     "dev:realtime": "tsx watch scripts/dev-realtime.ts",
     "build": "next build",
+    "build:netlify": "pnpm --package=netlify-cli dlx netlify build --offline",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20261103.1",
+    "@electric-sql/pglite": "0.3.16",
     "@playwright/test": "^1.64.1",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",

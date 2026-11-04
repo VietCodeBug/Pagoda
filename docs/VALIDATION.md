@@ -6,7 +6,7 @@ Ngày 04/11/2026. Node.js 22.20.0 trên Windows. Các lượt đầu dùng Swift
 | --- | --- |
 | `pnpm typecheck` | Đạt |
 | `pnpm cf:typecheck` | Đạt |
-| `pnpm test` | 34/34 đạt: phòng, đường đi, storage/range, public Realtime và chuẩn hóa env Netlify |
+| `pnpm test` | 45/45 đạt: phòng, đường đi, storage/range, public Realtime, env, migration PostgreSQL và output Netlify |
 | `pnpm build` | Đạt; game, guest/prayer API, asset route và capability route được build |
 | `pnpm smoke` | Đạt với Next local, Neon thật và hai WebSocket client |
 | Wrangler `deploy --dry-run` | Đạt; không deploy |
@@ -45,13 +45,21 @@ Migration chỉ bổ sung `vto_players`, `vto_prayers` và index. Dữ liệu QA
 
 `pnpm env:netlify` đã tạo `.env.netlify` với 12 biến có giá trị; các dòng URL cũ được đặt tên, PostgreSQL bỏ dấu chấm phẩy cuối, storage dùng `NEON_STORAGE_*` để tránh biến AWS dành riêng. `pnpm env:check --file .env.netlify` đạt kiểm tra offline. Chạy lại lệnh export giữ nguyên session secret và Worker URL đã cấu hình; không in credential.
 
-`pnpm build`, TypeScript web/Worker và 34 bài kiểm tra đều đạt. Dùng chính `.env.netlify` để kết nối PostgreSQL `SELECT 1`, S3 HEAD xác nhận kích thước avatar và Neon Realtime báo live. Phép thử S3 cố ý gán AWS credential/region giả của nền tảng; cấu hình Neon có tên riêng vẫn được ưu tiên. Build production local nạp file import đã qua API smoke và hai client WebSocket; dữ liệu QA được dọn. Quét bundle client không tìm thấy credential local.
+Lượt chuẩn bị env ban đầu đã qua `pnpm build`, TypeScript web/Worker và 34 bài kiểm tra. Dùng chính `.env.netlify` để kết nối PostgreSQL `SELECT 1`, S3 HEAD xác nhận kích thước avatar và Neon Realtime báo live. Phép thử S3 cố ý gán AWS credential/region giả của nền tảng; cấu hình Neon có tên riêng vẫn được ưu tiên. Build production local nạp file import đã qua API smoke và hai client WebSocket; dữ liệu QA được dọn. Quét bundle client không tìm thấy credential local.
 
 Chưa deploy hay chạy kiểm tra trên hạ tầng Netlify. `NEXT_PUBLIC_REALTIME_URL` còn trống và được cảnh báo rõ; cần URL Worker public để bật multiplayer. Data API chưa có JWT nên tiếp tục dùng PostgreSQL. Auth/JWKS chỉ lưu URL tham khảo, không kích hoạt đăng nhập.
 
+## Sửa pipeline Netlify và migration sau PR #1
+
+`pnpm check` đạt TypeScript web/Worker và 45 tests trong 8 file. PGlite thực thi PostgreSQL thật trong bộ nhớ: tạo mới, nâng cấp baseline cũ, sửa database do PR #1 tạo và chạy lại migration đều giữ dữ liệu, phục hồi CHECK/FK đúng, bảo vệ lời riêng khỏi role anonymous. Dữ liệu cũ không hợp lệ khiến bước repair rollback, không bị sửa/xóa. Drizzle metadata check đạt; snapshot mới nhất so với schema không sinh DDL. Kiểm tra chỉ đọc trên Neon xác nhận hai CHECK hiện tại đã validated; không áp dụng migration production.
+
+`netlify.toml` khai báo adapter không ghim phiên bản, tiếp theo là plugin kiểm tra output. Netlify CLI 27.16.2 / Build 37.7.3 / Next.js Runtime 5.16.6 đã hoàn thành build local, đóng gói `___netlify-server-handler` và báo `Verified Netlify Next.js output: catch-all API function, client bundles and game assets.` Các test riêng chặn đúng layout `.next` thô từng gây 404.
+
+Phép build Netlify được chạy trong bản sao dưới `.wrangler/netlify-validation`. Windows tại máy thử không có quyền tạo POSIX symlink; bản build chuẩn báo EPERM ở bước copy của adapter. Công cụ thử nghiệm chỉ trong `.wrangler` thay copy symlink của handler bằng copy file/junction để chạy tiếp các bước adapter và bundler; code adapter, app và cấu hình gửi Git không bị patch. Đây là bằng chứng kiểm tra artifact/lifecycle trên Windows, không phải kiểm tra runtime Netlify Linux hay số đo dung lượng bundle Linux. Không publish lên host trong lượt sửa này.
+
 ## Phạm vi còn cần đo riêng
 
-Chưa deploy public, chưa benchmark 20 thiết bị cùng lúc, chưa đo FPS/nhiệt/bộ nhớ trên điện thoại thật. Bài kiểm tra 20 chỗ và từ chối người thứ 21 xác nhận luật phòng, không phải benchmark hiệu năng render. Camera và collision dùng hình đơn giản gần với kiến trúc; clip nghi lễ hiện là pose runtime. Better Auth/account-link, moderation và phục hồi room sau deploy nằm trong roadmap.
+Chưa xác nhận bản sửa chạy trên production sau khi người dùng push/deploy; chưa benchmark 20 thiết bị cùng lúc, chưa đo FPS/nhiệt/bộ nhớ trên điện thoại thật. Bài kiểm tra 20 chỗ và từ chối người thứ 21 xác nhận luật phòng, không phải benchmark hiệu năng render. Camera và collision dùng hình đơn giản gần với kiến trúc; clip nghi lễ hiện là pose runtime. Better Auth/account-link, moderation và phục hồi room sau deploy nằm trong roadmap.
 
 ## Sửa rung khi di chuyển
 

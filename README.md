@@ -65,7 +65,7 @@ Dùng `.env.example` để tham khảo, giữ thông tin thật trong `.env`/`.e
 pnpm db:migrate
 ```
 
-Migration bổ sung bảng/view có tiền tố `vto_`. View `vto_public_prayers` chỉ có lời nguyện công khai; các role Data API không được đọc bảng hồ sơ hay nguồn lời nguyện riêng tư. Với kết nối đã được cung cấp trong workspace, migration đã chạy thành công. Không có database thì hồ sơ khách vẫn dùng cookie, lời nguyện chỉ ở bộ nhớ process; UI/API ghi rõ chế độ lưu trữ. Dữ liệu bộ nhớ không bền vững khi restart hoặc giữa nhiều instance.
+Migration bổ sung bảng/view có tiền tố `vto_`. Runner chỉ chạy danh sách chuẩn trong `src/lib/migrations.ts`, bỏ qua SQL ngoài danh sách, gồm baseline trùng của PR #1. `0002_restore_validation.sql` bổ sung CHECK bị thiếu nếu database từng được tạo bằng baseline đó; không sửa/xóa hồ sơ hoặc lời nguyện. Metadata Drizzle khớp baseline hiện có. View `vto_public_prayers` chỉ có lời nguyện công khai; các role Data API không được đọc bảng hồ sơ hay nguồn lời nguyện riêng tư. Không có database thì hồ sơ khách vẫn dùng cookie, lời nguyện chỉ ở bộ nhớ process; UI/API ghi rõ chế độ lưu trữ. Dữ liệu bộ nhớ không bền vững khi restart hoặc giữa nhiều instance. Xem [quy tắc migration](docs/MIGRATIONS.md).
 
 `.env.local` local có secret riêng đã được tạo và nằm trong `.gitignore`. Khi deploy, tự cấu hình một secret mới trên host; không đưa secret vào biến `NEXT_PUBLIC_*`.
 
@@ -74,6 +74,7 @@ Migration bổ sung bảng/view có tiền tố `vto_`. View `vto_public_prayers
 ```powershell
 pnpm check          # TypeScript web + Worker và các bài kiểm tra logic
 pnpm build          # Build frontend production
+pnpm build:netlify  # Chạy Netlify CLI build local, có adapter và kiểm tra output; không deploy
 pnpm smoke          # Cần pnpm dev đang chạy; kiểm tra API/Neon và hai WebSocket client
 pnpm test:ui        # Cần pnpm dev + Chrome đã cài; ảnh kết quả trong artifacts/
 pnpm smoke:neon     # Hai kết nối Neon thật, riêng tư, S3 checksum/range; tự dọn UUID QA
@@ -88,9 +89,9 @@ pnpm exec wrangler deploy --dry-run
 ## Deploy Netlify
 
 1. Chạy `pnpm env:netlify` để tạo `.env.netlify` từ cấu hình local. File có tên biến hợp lệ để import, không chứa dòng URL đứng riêng và không được commit.
-2. Đưa mã nguồn cùng `public/assets` lên GitHub, kết nối repo với Netlify. `netlify.toml` đã cấu hình `pnpm build` và publish `.next`; Netlify tự dùng adapter Next.js.
+2. Đưa mã nguồn cùng `public/assets` lên GitHub, kết nối repo với Netlify. `netlify.toml` đã cấu hình `pnpm build`, publish `.next`, khai báo adapter Next.js và plugin kiểm tra output. Build sẽ dừng nếu thiếu function/route/bundle/asset hoặc còn publish thư mục server thô.
 3. Import `.env.netlify` trong **Project configuration → Environment variables**, giữ **All scopes** hoặc bao gồm **Builds + Functions**, rồi deploy.
-4. Cấu hình Worker `ALLOWED_ORIGIN=https://TEN-GAME.netlify.app`, chạy `pnpm deploy:realtime` sau khi đăng nhập Cloudflare. Đặt URL Worker thật dạng `wss://…workers.dev` vào `NEXT_PUBLIC_REALTIME_URL` trên Netlify và deploy lại.
+4. Worker đã có `ALLOWED_ORIGIN=https://bespoke-arithmetic-045314.netlify.app` trong `wrangler.jsonc`; sửa giá trị khi đổi domain. Chạy `pnpm deploy:realtime` sau khi đăng nhập Cloudflare. Đặt URL Worker thật dạng `wss://…workers.dev` vào `NEXT_PUBLIC_REALTIME_URL` trên Netlify và deploy lại.
 5. Thêm domain Netlify vào allowed origins của Neon Realtime. Thử hai trình duyệt cùng phòng trước khi chia sẻ công khai.
 
 Xem [hướng dẫn Netlify từng bước](docs/DEPLOY_NETLIFY.md), gồm tên biến, import env, server multiplayer và xử lý lỗi. Trên Netlify dùng `NEON_STORAGE_*` thay các biến AWS dành riêng. URL Neon Auth/JWKS được đặt tên nhưng game vẫn đăng nhập bằng khách.
