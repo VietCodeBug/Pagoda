@@ -325,9 +325,16 @@ function BellTower({ night, bellAt }: { night: boolean; bellAt: number }) {
   </group>;
 }
 
-function Garden() {
+function Garden({ quality }: { quality: Quality }) {
   return <group>
-    {[[-19, -11], [-16, -12], [-13, -12.5], [-10, -12]].map(([x, z], i) => <Tree key={i} position={[x, 0, z]} scale={0.8 + i * 0.08} seed={i + 25} />)}
+    {/* Keep the statue's front clear of canopies and the meditation cushions. */}
+    {[[-22.5, -17], [-11.3, -16.8], [-13, -12.5], [-10, -12]].map(([x, z], i) => <Tree key={i} position={[x, 0, z]} scale={0.8 + i * 0.08} seed={i + 25} />)}
+    <Box position={[-18, 0.12, -14.2]} size={[4.7, 0.48, 4]} color="#817d68" />
+    <Box position={[-18, 0.43, -14.2]} size={[4.2, 0.18, 3.6]} color="#b5ab88" />
+    <Suspense fallback={<StatueFallback position={[-18, 0.52, -14.2]} />}>
+      <Buddha path={assetUrl('garden-buddha.glb')} position={[-18, 0.52, -14.2]} height={4} quality={quality} />
+    </Suspense>
+    <Sign text="VƯỜN TĨNH TÂM" position={[-18, 0.32, -12.16]} size={[3.3, 0.46]} />
     {[[-17.6, -7.5], [-15.3, -7.5], [-13, -7.5]].map(([x, z], i) => <group key={i} position={[x, 0, z]}>
       <mesh position={[0, 0.13, 0]} receiveShadow castShadow><cylinderGeometry args={[0.67, 0.7, 0.22, 24]} /><meshStandardMaterial color={i === 1 ? "#9d8e6a" : "#7f8262"} roughness={1} /></mesh>
       <mesh position={[0, 0.25, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[0.53, 0.55, 32]} /><meshStandardMaterial color="#c6b78d" /></mesh>
@@ -434,7 +441,7 @@ function World({ quality, night, incenseUntil, bellAt }: WorldProps) {
     <Courtyard />
     <MainHall quality={quality} night={night} incenseUntil={incenseUntil} />
     <Pond quality={quality} night={night} />
-    <Garden />
+    <Garden quality={quality}/>
     <BellTower night={night} bellAt={bellAt} />
     <Arena />
     <Gate night={night} />

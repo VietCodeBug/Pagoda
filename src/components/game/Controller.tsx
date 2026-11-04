@@ -9,6 +9,7 @@ import {playAction,runtime,showToast,useGame,type AnimationName} from '@/lib/gam
 import {findPath,INTERACTIONS,isInArena,OBSTACLES,POND} from '@/lib/world-layout';
 import type {Player} from '@/lib/protocol';
 import {ringBell} from '@/lib/audio';
+import {LOTUS_POINTS,RACE_CHECKPOINTS} from '@/lib/activities';
 
 const cameraBoxes=OBSTACLES.map(o=>new THREE.Box3(new THREE.Vector3(o.x-o.hx,-.1,o.z-o.hz),new THREE.Vector3(o.x+o.hx,o.height,o.z+o.hz)));
 cameraBoxes.push(new THREE.Box3(new THREE.Vector3(-9.6,6.05,-21.1),new THREE.Vector3(9.6,9.3,-4.1)));
@@ -17,11 +18,31 @@ cameraBoxes.push(new THREE.Box3(new THREE.Vector3(7.4,4.1,-7.6),new THREE.Vector
 cameraBoxes.push(new THREE.Box3(new THREE.Vector3(-5.4,5,21.2),new THREE.Vector3(5.4,6.65,24.8)));
 export function interact(){
   const state=useGame.getState();if(!state.entered||state.panel!=='none'||state.chatOpen||state.hp<=0)return;
+  const activity=state.activity;
+  if(activity?.mode&&activity.phase!=='finished'){
+    if(activity.mode==='fishing'||activity.mode==='fishing-contest'){
+      if(activity.phase==='bite')runtime.send({type:'activity',action:'reel'});
+      else if(activity.phase!=='waiting')runtime.send({type:'activity',action:'cast'});
+      return;
+    }
+    if(activity.mode==='lotus-hunt'){
+      const lotus=LOTUS_POINTS.find(p=>!activity.collected?.includes(p.id)&&Math.hypot(p.x-state.position.x,p.z-state.position.z)<=1.8);
+      if(lotus)runtime.send({type:'activity',action:'collect',targetId:lotus.id});else showToast('Tìm một đóa sen phát sáng rồi đến gần để nhặt.');return;
+    }
+    if(activity.mode==='race'){runtime.send({type:'activity',action:'checkpoint',index:activity.checkpoint||0});return;}
+    if(activity.mode==='lanterns'){runtime.send({type:'activity',action:'lantern'});return;}
+    if(activity.mode==='training'){runtime.send({type:'activity',action:'strike'});return;}
+  }
   if(state.action==='sit'){playAction('idle',0);return;}
   if(Date.now()<state.actionUntil)return;
   const near=state.nearby;
   if(!near){showToast('Đến gần bàn hương, vườn thiền hoặc tháp chuông để tương tác.');return;}
   if(near.id==='incense'){useGame.setState({panel:'prayer'});return;}
+  if(near.id==='games'){runtime.keys.clear();runtime.joystick={x:0,y:0};useGame.setState({panel:'activities'});return;}
+  if(near.id==='fishing'||near.id==='lanterns'||near.id==='training'){
+    if(state.status!=='online'){showToast('Hoạt động cần kết nối phòng online.');return;}
+    runtime.send({type:'activity',action:'start',mode:near.id});return;
+  }
   if(near.id==='sit'){playAction('sit',Infinity);return;}
   if(near.id==='combat'){
     if(state.status!=='online'){showToast('Kết nối phòng online để tham gia giao đấu.');return;}
@@ -81,7 +102,8 @@ export default function Controller(){
     const clear=()=>{runtime.keys.clear();runtime.joystick={x:0,y:0};};
     const keydown=(e:KeyboardEvent)=>{
       const state=useGame.getState();const typing=(e.target as HTMLElement)?.matches('input,textarea,select');
-      if(e.code==='Escape'){clear();runtime.path=[];if(state.panel!=='none')useGame.setState({panel:'none'});else if(state.chatOpen)useGame.setState({chatOpen:false});else if(state.action==='sit')playAction('idle',0);return;}
+      if(e.code==='Escape'){clear();runtime.path=[];if(state.panel!=='none')useGame.setState({panel:'none'});else if(state.chatOpen)useGame.setState({chatOpen:false});else if(state.activity?.mode&&state.activity.phase!=='finished')runtime.send({type:'activity',action:'leave'});else if(state.action==='sit')playAction('idle',0);return;}
+      if(e.code==='KeyG'&&!typing&&!state.chatOpen&&(state.panel==='none'||state.panel==='activities')){clear();useGame.setState({panel:state.panel==='activities'?'none':'activities'});return;}
       if(typing||state.panel!=='none'||state.chatOpen)return;
       if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)){e.preventDefault();runtime.path=[];}
       runtime.keys.add(e.code);
@@ -153,7 +175,7 @@ export default function Controller(){
     let next:AnimationName=now<state.actionUntil?state.action:state.hp<=0?'bow':h.moveSpeed>.23?(h.moveSpeed>3.3?'run':'walk'):'idle';
     if(next!==lastAnimation.current){lastAnimation.current=next;setAnimation(next);}
     if(h.moveSpeed>.2) {euler.setFromQuaternion(h.currQuat);yaw.current=euler.y;}
-    if(visual.current)visual.current.rotation.y=0;
+    if(visual.current)visual.current.rotation.y=next==='fish'?Math.atan2(-15-p.x,5-p.z)-yaw.current:0;
     if(visual.current)visual.current.getWorldPosition(renderedPosition);else renderedPosition.set(p.x,0,p.z);
     target.set(renderedPosition.x,1.35,renderedPosition.z);
     const distance=runtime.cameraDistance,cp=runtime.cameraPitch,cy=runtime.cameraYaw;
@@ -173,6 +195,11 @@ export default function Controller(){
       useGame.setState({position:{x:p.x,z:p.z},nearby});
       // Action changes travel as explicit events; movement only carries locomotion.
       if(!locked)runtime.send({type:'move',x:p.x,z:p.z,yaw:yaw.current,animation:next==='walk'||next==='run'?next:'idle'});
+      const activity=state.activity;
+      if(activity?.mode==='race'&&activity.phase==='playing'){
+        const index=activity.checkpoint||0,checkpoint=RACE_CHECKPOINTS[index];
+        if(checkpoint&&Math.hypot(checkpoint.x-p.x,checkpoint.z-p.z)<1.6)runtime.send({type:'activity',action:'checkpoint',index});
+      }
     }
   },-.5);
   return <>

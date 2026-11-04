@@ -20,7 +20,13 @@ pnpm assets:scene
 pnpm storage:upload
 ```
 
-Pipeline giới hạn source đơn lẻ 25 MB, nén texture xuống 1024, gộp glTF và ảnh vào GLB, giữ cache nguồn trong `.wrangler/scene-source-cache`. Tổng bộ cảnh tải thêm khoảng 16 MiB; tổng allowlist 21 file khoảng 27,8 MiB gồm avatar/tượng/nhạc gốc đã tối ưu. Các asset được đưa vào bucket `pagoda` theo key có hash; các object cũ/khác giữ nguyên.
+Pipeline tải Poly Haven giới hạn source đơn lẻ 25 MB, nén texture xuống 1024, gộp glTF và ảnh vào GLB, giữ cache nguồn trong `.wrangler/scene-source-cache`. Tổng bộ cảnh tải thêm khoảng 16 MiB; allowlist hiện có 23 file, 31.303.402 byte, gồm các model người dùng và clip đấm mới. Các asset được đưa vào bucket `pagoda` theo key có hash; các object cũ/khác giữ nguyên.
+
+## Tượng ngoài vườn và động tác đấm
+
+Nguồn `tượng phật ngoài vườn.glb` do người dùng cung cấp được giữ nguyên. `pnpm assets:garden` tạo `garden-buddha.glb`: 857.074 → 54.935 đỉnh (-93,59%), 1.495.918 → 59.836 tam giác (-96%), 93.488.364 → 2.139.048 byte; ba texture 4K thành JPEG 1K. Metadata SHA-256/thông số nằm trong `public/assets/garden-buddha.metadata.json`. Tượng cao 4 m trên bệ, đặt tại (-18, -14.2) ở vườn thiền; có collider và vùng tránh camera tương ứng. Đã so sánh mặt/dáng trước sau và đi đến tượng trong game. GLB có 0 lỗi, 1 cảnh báo tangent kế thừa.
+
+`pnpm assets:punch` tạo `punch.glb` 35.900 byte: clip jab/cross/thu về thế thủ dài 0,68 giây trên cùng rig nhân vật. Clip-only nên không tải lặp mesh. Avatar dùng clip mới cho attack và giữ clip gầm cũ ngoài combat. GLB có 0 lỗi/0 cảnh báo; test kiểm tra track binding, tầm tay, chân đứng ổn định và pose kết thúc. Cả hai asset mới đã upload S3 và kiểm tra checksum.
 
 Tất cả bốn GLB cảnh mới đã qua Khronos glTF Validator với 0 lỗi. Các cảnh báo tangent kế thừa không ngăn Three.js render. Chưa có benchmark FPS trên điện thoại thật; cần đo trước khi tăng số tán cây hoặc nâng texture lên 2K/4K.
 

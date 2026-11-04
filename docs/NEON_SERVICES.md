@@ -38,9 +38,10 @@ Các tên cũ `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY
 
 ## Model và âm thanh trên S3
 
-Chỉ file trong allowlist của ứng dụng được upload và phục vụ. Hiện có 21 file, gồm:
+Chỉ file trong allowlist của ứng dụng được upload và phục vụ. Hiện có 23 file, gồm:
 
 - `avatar.glb`
+- `punch.glb`, `garden-buddha.glb`
 - `buddha-center.glb`, `buddha-left.glb`, `buddha-right.glb`
 - `temple-ambient.mp3`
 - `manifest.json`
@@ -117,7 +118,7 @@ pnpm exec tsx scripts/setup-realtime.ts --probe
 ```
 
 - PostgreSQL: đã kiểm tra kết nối và bảng game.
-- S3: 21 file đã upload/xác minh SHA-256 trên bucket `pagoda`; GET redirect và byte range âm thanh đã kiểm tra thực tế.
+- S3: 23 file đã upload/xác minh SHA-256 trên bucket `pagoda`, gồm clip đấm và tượng ngoài vườn; GET redirect và byte range âm thanh đã kiểm tra thực tế.
 - Realtime: secret server đã cấu hình, upstream báo `live`; hai subscription nhận insert/delete, loại lời nguyện riêng. Trình duyệt đã kết nối trực tiếp và hiển thị bài mới.
 - Neon Auth/JWKS: giữ ngoài phạm vi theo yêu cầu.
 

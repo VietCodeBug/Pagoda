@@ -25,6 +25,7 @@ Model tối ưu và nhạc đã có trong `public/assets`; không cần tự chu
 - Rapier + Ecctrl, collision, camera tự thu gần, A* cho tùy chọn nhấp để đi tới.
 - E hiện theo vị trí: dâng hương, gửi lời nguyện riêng tư/công khai, ngồi thiền, thỉnh chuông. Khóa di chuyển khi làm nghi lễ.
 - Multiplayer thật, nội suy nhân vật, chat toàn phòng, bong bóng chat và emote. NPC được ghi rõ là NPC.
+- Thoát/đổi phòng xóa avatar cũ; mất heartbeat khoảng 60 giây thì server thu hồi phiên. Reload thay đúng phiên của tab, hai tab cùng hồ sơ vẫn có hai avatar riêng; điểm xuất hiện tránh đứng chồng nhau.
 - Giao đấu tự nguyện ở võ đài: HP 100, đòn đánh giảm 14 HP, cooldown 700 ms, tầm 2,4 m, hồi sinh sau 5 giây. Server quyết định sát thương; chỉ người đã bật giao đấu mới nhận đòn.
 - Nhạc nền được cung cấp, chuông tổng hợp, mute, Low/Medium/High, chế độ ngày/đêm và loading.
 - Hồ sơ khách ký cookie HttpOnly; Drizzle + Neon lưu hồ sơ và lời nguyện. Di chuyển và chat không ghi vào database.
@@ -79,6 +80,7 @@ pnpm build:netlify  # Chạy Netlify CLI build local, có adapter và kiểm tra
 pnpm smoke          # Cần pnpm dev đang chạy; kiểm tra API/Neon và hai WebSocket client
 pnpm test:ui        # Cần pnpm dev + Chrome đã cài; ảnh kết quả trong artifacts/
 pnpm test:tabs      # Hai tab chung cookie: ID nhân vật riêng, nhìn thấy nhau, chat và di chuyển
+pnpm test:presence  # Đóng/nhân bản tab, reload nhiều lần, đổi phòng và không để lại avatar cũ
 pnpm smoke:neon     # Hai kết nối Neon thật, riêng tư, S3 checksum/range; tự dọn UUID QA
 pnpm realtime:check # Kiểm tra subscription upstream, không in secret
 pnpm exec wrangler deploy --dry-run
@@ -87,6 +89,12 @@ pnpm exec wrangler deploy --dry-run
 `smoke` tạo dữ liệu QA bằng UUID và tự dọn đúng các bản ghi đó. `test:ui` kiểm tra giao diện, điều khiển, chat, responsive và hai phiên Chrome. Thư mục `artifacts/` không đưa lên Git.
 
 `test:ui` mặc định dùng GPU của Chrome. Khi cần kiểm tra trong môi trường không có GPU, đặt `SMOKE_SOFTWARE_RENDERER=1`; thời gian frame khi render bằng CPU không đại diện cho máy chơi thật. Game tự hạ độ phân giải render khi thiếu FPS và dùng cây đơn giản ở xa; Medium/High vẫn giữ asset chi tiết khi lại gần.
+
+## Hoạt động mới
+
+Nhấn **G** hoặc nút **Hoạt động** để chọn câu cá, hội câu cá, săn sen, đua checkpoint, nhớ tiếng chuông, thả đèn hợp tác, luyện quyền và đấu tay đôi. Sổ cá có 12 loài/5 độ hiếm; cá, xu, XP và kỷ lục lưu Neon bằng phần thưởng do server ký, không tin điểm do client gửi. Xem [cách chơi và vận hành](docs/ACTIVITIES.md).
+
+Nhân vật dùng animation đấm jab/cross mới từ `punch.glb`, không dùng clip gầm. Tượng Phật ngoài vườn được đặt tại vườn thiền; bản tối ưu còn 54.935 đỉnh so với 857.074 ban đầu và khoảng 2,1 MB.
 
 ## Deploy Netlify
 

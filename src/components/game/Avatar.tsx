@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Html, useAnimations, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
-  AnimationMixer, Bone, Color, Group, LoopRepeat, Material, Mesh,
+  AnimationMixer, Bone, Color, Group, LoopOnce, LoopRepeat, Material, Mesh,
   MeshStandardMaterial, Quaternion, Vector3,
 } from 'three';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
@@ -84,6 +84,14 @@ function createPoses(scene: Group, neutral: Pose) {
   if (neck) neck.quaternion.multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), 0.13));
   poses.set('bow', capturePose(scene));
   restorePose(scene, neutral);
+  for (const side of ['Left', 'Right']) {
+    const sign = side === 'Left' ? 1 : -1;
+    aimBone(scene, `${side}Arm`, [sign * 0.23, -0.52, 0.70]);
+    aimBone(scene, `${side}ForeArm`, [-sign * 0.16, 0.04, 0.98]);
+    aimBone(scene, `${side}Hand`, [-sign * 0.08, -0.08, 0.98]);
+  }
+  poses.set('fish', capturePose(scene));
+  restorePose(scene, neutral);
   const hips = findBone(scene, 'Hips');
   if (hips) hips.position.y -= 0.22;
   for (const side of ['Left', 'Right']) {
@@ -114,6 +122,12 @@ function Nameplate({ name, hp = 100, inCombat, bubble }: Pick<AvatarProps, 'name
 
 export default function Avatar({ animation, avatar, ...label }: AvatarProps) {
   const loaded = useGLTF(assetUrl('avatar.glb'));
+  const punch = useGLTF(assetUrl('punch.glb'));
+  const clips = useMemo(() => [
+    // The source's "Attack" export is a roar. Use the separately authored rig clip.
+    ...loaded.animations.filter((clip) => clip.name !== 'Attack'),
+    ...punch.animations,
+  ], [loaded.animations, punch.animations]);
   const style = AVATAR_STYLES[((avatar % AVATAR_STYLES.length) + AVATAR_STYLES.length) % AVATAR_STYLES.length];
   const { scene, neutral, poses, materials } = useMemo(() => {
     const instance = clone(loaded.scene) as Group;
@@ -152,15 +166,18 @@ export default function Avatar({ animation, avatar, ...label }: AvatarProps) {
     return { scene: instance, neutral: base, poses: createPoses(instance, base), materials: ownedMaterials };
   }, [loaded.scene, loaded.animations, style.color]);
   const group = useRef<Group>(null);
-  const { actions } = useAnimations(loaded.animations, scene);
-  const clipName = animation === 'walk' ? 'Walk' : animation === 'run' ? 'Run' : animation === 'attack' ? 'Attack' : animation === 'wave' ? 'Agree' : null;
+  const { actions } = useAnimations(clips, scene);
+  const clipName = animation === 'walk' ? 'Walk' : animation === 'run' ? 'Run' : animation === 'attack' ? 'PunchCombo' : animation === 'wave' ? 'Agree' : null;
 
   useEffect(() => {
     if (!clipName) return;
     const action = actions[clipName];
     if (!action) return;
-    action.reset().setLoop(LoopRepeat, Infinity).setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(0.18).play();
-    return () => { action.fadeOut(0.18); };
+    const punching = clipName === 'PunchCombo';
+    action.clampWhenFinished = punching;
+    action.reset().setLoop(punching ? LoopOnce : LoopRepeat, punching ? 1 : Infinity)
+      .setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(punching ? 0.07 : 0.18).play();
+    return () => { action.fadeOut(punching ? 0.12 : 0.18); };
   }, [actions, clipName]);
 
   useEffect(() => () => { materials.forEach((material) => material.dispose()); }, [materials]);
@@ -194,3 +211,4 @@ export function SimpleAvatar({ avatar = 0, ...label }: Partial<AvatarProps>) {
 }
 
 useGLTF.preload(assetUrl('avatar.glb'));
+useGLTF.preload(assetUrl('punch.glb'));

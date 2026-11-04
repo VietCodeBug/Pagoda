@@ -10,7 +10,7 @@ describe('canonical database migrations', () => {
     const executed: string[][] = [];
     const plan = await applyMigrations(available, async (file) => { read.push(file); return 'SELECT 1;'; }, async (statements) => { executed.push(statements); });
     expect(read).toEqual(MIGRATION_FILES);
-    expect(executed).toHaveLength(3);
+    expect(executed).toHaveLength(MIGRATION_FILES.length);
     expect(plan.ignored).toEqual(['0000_little_mathemanic.sql']);
   });
 

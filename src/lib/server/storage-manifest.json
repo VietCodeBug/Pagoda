@@ -7,6 +7,18 @@
       "bytes": 1663236,
       "contentType": "model/gltf-binary"
     },
+    "punch.glb": {
+      "key": "vto/v1/02d46ba91b812742401624f4432e66d6012e05d46167153f32a001fd68708c23/punch.glb",
+      "sha256": "02d46ba91b812742401624f4432e66d6012e05d46167153f32a001fd68708c23",
+      "bytes": 35900,
+      "contentType": "model/gltf-binary"
+    },
+    "garden-buddha.glb": {
+      "key": "vto/v1/2bd4f2da50f35a3564fbc96d5991301febc9fbd71e5f1da75ea58e98fcfb4db3/garden-buddha.glb",
+      "sha256": "2bd4f2da50f35a3564fbc96d5991301febc9fbd71e5f1da75ea58e98fcfb4db3",
+      "bytes": 2139048,
+      "contentType": "model/gltf-binary"
+    },
     "buddha-center.glb": {
       "key": "vto/v1/6e831451cdf9b3d7d74052d632cec0ac9ef4a47b93ddaa536bd91dceb34ad952/buddha-center.glb",
       "sha256": "6e831451cdf9b3d7d74052d632cec0ac9ef4a47b93ddaa536bd91dceb34ad952",

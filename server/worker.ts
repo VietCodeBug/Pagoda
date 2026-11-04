@@ -1,7 +1,8 @@
 import { Server, routePartykitRequest, type Connection } from 'partyserver';
 import { TempleRoom } from './room';
+import { createGameRoom, receiveGameMessage } from './game-transport';
 
-type Env = { Temple: DurableObjectNamespace; ALLOWED_ORIGIN?: string };
+type Env = { Temple: DurableObjectNamespace; ALLOWED_ORIGIN?: string; GAME_REWARD_SECRET?: string };
 
 export class Temple extends Server<Env> {
   static options = { hibernate: false };
@@ -9,15 +10,24 @@ export class Temple extends Server<Env> {
   private timer?: ReturnType<typeof setInterval>;
 
   onStart() {
-    this.room = new TempleRoom(this.name);
+    this.room = createGameRoom(this.name,this.env.GAME_REWARD_SECRET);
   }
   onConnect(connection: Connection) {
     const accepted = this.room!.connect(connection.id, { send: (message) => connection.send(JSON.stringify(message)), close: (code, reason) => connection.close(code, reason) });
-    if (accepted && !this.timer) this.timer = setInterval(() => this.room?.tick(), 100);
+    if (accepted && !this.timer) this.timer = setInterval(() => {
+      this.room?.tick();
+      this.stopEmptyRoom();
+    }, 100);
   }
-  onMessage(connection: Connection, message: string | ArrayBuffer) { if (typeof message === 'string') this.room!.receive(connection.id, message); }
+  async onMessage(connection: Connection, message: string | ArrayBuffer) {
+    if (typeof message === 'string') await receiveGameMessage(this.room!,connection.id,message,this.env.GAME_REWARD_SECRET);
+    this.stopEmptyRoom();
+  }
   private removeConnection(connection: Connection) {
     this.room?.disconnect(connection.id);
+    this.stopEmptyRoom();
+  }
+  private stopEmptyRoom() {
     if (!this.room?.size && this.timer) { clearInterval(this.timer); this.timer = undefined; }
   }
   onClose(connection: Connection) { this.removeConnection(connection); }

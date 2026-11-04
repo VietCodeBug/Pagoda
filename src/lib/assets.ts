@@ -1,6 +1,8 @@
 /** Public game assets only. Storage credentials and bucket selection stay on the server. */
 export const GAME_ASSET_NAMES = [
   'avatar.glb',
+  'punch.glb',
+  'garden-buddha.glb',
   'buddha-center.glb',
   'buddha-left.glb',
   'buddha-right.glb',

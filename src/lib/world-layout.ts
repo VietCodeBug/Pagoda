@@ -1,6 +1,7 @@
 export type Obstacle = { x: number; z: number; hx: number; hz: number; height: number };
 export const POND = { x: -15, z: 5, rx: 5.2, rz: 6.5 };
 export const OBSTACLES: Obstacle[] = [
+  { x: -18, z: -14.2, hx: 2.35, hz: 2, height: 4.6 },
   { x: 0, z: -20.75, hx: 7.75, hz: .16, height: 5.1 },
   { x: -7.55, z: -13.4, hx: .15, hz: 7.25, height: 5 },
   { x: 7.55, z: -13.4, hx: .15, hz: 7.25, height: 5 },
@@ -20,6 +21,10 @@ export const INTERACTIONS = [
   { id: 'incense', x: 0, z: -11.9, radius: 3, label: 'Dâng hương', description: 'Gửi một lời nguyện bình an', icon: 'flame' },
   { id: 'sit', x: -15, z: -8, radius: 3.7, label: 'Ngồi thiền', description: 'Dừng lại, hít thở và lắng nghe', icon: 'flower' },
   { id: 'bell', x: 10, z: -2.7, radius: 3, label: 'Thỉnh chuông', description: 'Một tiếng chuông, một khoảng lặng', icon: 'bell' },
+  { id: 'fishing', x: -8.7, z: 6, radius: 2.4, label: 'Câu cá', description: 'Thả câu · 12 loài cá · 5 độ hiếm', icon: 'fish' },
+  { id: 'lanterns', x: -8.5, z: 12.5, radius: 2.8, label: 'Thả đèn cùng phòng', description: 'Hợp sức thắp sáng bầu trời', icon: 'lantern' },
+  { id: 'training', x: 20, z: 2, radius: 2.5, label: 'Luyện quyền', description: 'Đấm mộc nhân trong 30 giây', icon: 'target' },
+  { id: 'games', x: 0, z: 16, radius: 2, label: 'Hoạt động & bộ sưu tập', description: 'G · 8 hoạt động để khám phá', icon: 'game' },
   { id: 'combat', x: 19, z: 6, radius: 6, label: 'Vào luyện võ', description: 'Giao đấu tự nguyện · 100 HP', icon: 'swords' },
 ] as const;
 export type Interaction = typeof INTERACTIONS[number];

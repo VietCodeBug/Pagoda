@@ -1,0 +1,56 @@
+{
+  "source": "tượng phật ngoài vườn.glb",
+  "output": "garden-buddha.glb",
+  "sourceSha256": "7e203f2f41da4d65704b0d28afbfee84571459d586e00948c2f706e2ba102e7a",
+  "sourceBytes": 93488364,
+  "outputBytes": 2139048,
+  "before": {
+    "vertices": 857074,
+    "triangles": 1495918
+  },
+  "after": {
+    "vertices": 54935,
+    "triangles": 59836
+  },
+  "afterSimplify": {
+    "vertices": 54935,
+    "triangles": 59836
+  },
+  "ratio": 0.04,
+  "maximumRelativeError": 0.0015,
+  "verticesRemovedPercent": 93.59,
+  "trianglesRemovedPercent": 96,
+  "textures": [
+    {
+      "originalWidth": 4096,
+      "originalHeight": 4096,
+      "width": 1024,
+      "height": 1024,
+      "bytes": 298806
+    },
+    {
+      "originalWidth": 4096,
+      "originalHeight": 4096,
+      "width": 1024,
+      "height": 1024,
+      "bytes": 306270
+    },
+    {
+      "originalWidth": 4096,
+      "originalHeight": 4096,
+      "width": 1024,
+      "height": 1024,
+      "bytes": 74113
+    }
+  ],
+  "sha256": "2bd4f2da50f35a3564fbc96d5991301febc9fbd71e5f1da75ea58e98fcfb4db3",
+  "placement": {
+    "x": -18,
+    "z": -14.2,
+    "plinthTop": 0.52,
+    "statueHeight": 4,
+    "baseWidth": 4.7,
+    "baseDepth": 4
+  },
+  "compression": "meshoptimizer simplification; 14-bit positions; 10-bit normals; 12-bit UVs; embedded 1K JPEG; no external decoder"
+}

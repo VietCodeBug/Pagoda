@@ -6,7 +6,7 @@ Ngày 04/11/2026. Node.js 22.20.0 trên Windows. Các lượt đầu dùng Swift
 | --- | --- |
 | `pnpm typecheck` | Đạt |
 | `pnpm cf:typecheck` | Đạt |
-| `pnpm test` | 50/50 đạt: phòng, đường đi, storage/range, public Realtime, env, migration PostgreSQL, output Netlify và cấu hình online |
+| `pnpm test` | 91/91 đạt: phòng/presence, định danh tab, đường đi, storage/range, public Realtime, env, PostgreSQL, output Netlify, hoạt động, clip đấm và phần thưởng |
 | `pnpm build` | Đạt; game, guest/prayer API, asset route và capability route được build |
 | `pnpm smoke` | Đạt với Next local, Neon thật và hai WebSocket client |
 | Wrangler `deploy --dry-run` | Đạt; không deploy |
@@ -15,6 +15,8 @@ Ngày 04/11/2026. Node.js 22.20.0 trên Windows. Các lượt đầu dùng Swift
 | Chrome trên build production cổng 3001 | 8 nhóm kiểm tra UI đạt, không có lỗi trình duyệt |
 | `pnpm smoke:neon` | Hai subscription Neon thật nhận insert/delete; private bị loại; S3 checksum và audio Range đạt |
 | Browser Live SQL trên cổng 3001 | Kết nối trực tiếp báo live, public xuất hiện/xóa tự động, private không xuất hiện |
+| `pnpm test:activities` | Bắt cá thực, đồng bộ hai tab, lưu/reload Neon, chống replay và khác hồ sơ; không có lỗi trang |
+| `pnpm test:presence` | Hai tab cùng cookie/sessionStorage, đóng/mở lại, ba lần reload, đổi phòng và spawn tách nhau; 212 snapshot, tối đa hai avatar QA, không lỗi trang |
 
 ## Chrome production
 
@@ -39,7 +41,7 @@ Bản hình ảnh tiếp theo có bầu trời HDRI có mây 2K, ánh sáng môi
 
 Đã thử tạo/sửa/tải lại hồ sơ, cookie bị sửa/hết hạn, origin khác, avatar/tên không hợp lệ, lời nguyện public/private và hai request gửi đồng thời. Lời nguyện riêng không xuất hiện trên API công khai; cooldown 30 giây áp dụng giữa nhiều request.
 
-Migration chỉ bổ sung `vto_players`, `vto_prayers` và index. Dữ liệu QA được dọn theo đúng UUID đã tạo; giữ nguyên dữ liệu khác.
+Migration giữ dữ liệu hiện có và bổ sung bảng/view/index trong namespace `vto_*`, gồm tiến trình trò chơi ở migration 0003. Dữ liệu QA được dọn theo đúng UUID đã tạo; giữ nguyên dữ liệu khác.
 
 ## Chuẩn bị Netlify
 
@@ -64,6 +66,26 @@ Worker `virtual-temple-realtime.phamvietanh19218.workers.dev` đã được ngư
 `pnpm test:tabs` đã qua trên Chrome với hai tab cùng BrowserContext/cookie: cùng hồ sơ khách, hai ID kết nối riêng, cả hai thấy avatar/số người, chat A nhận tại B và di chuyển WASD A xuất hiện trong snapshot B. Không có lỗi trang; đúng một hồ sơ QA và lời nguyện liên quan được dọn theo UUID. Production dùng Worker mặc định qua config API no-store; `REALTIME_URL` cho phép override runtime, alias cũ được giữ. Không báo online trước gói welcome.
 
 Courtyard và roof InstancedMesh đã tính lại boundingBox/boundingSphere sau khi cập nhật ma trận. Tái hiện bằng Three.js cho sân lát đá tại 24 góc: bounds cũ cull sai 21 góc, bounds mới không cull sai góc nào. Bốn ảnh orbit mobile được kiểm tra, không mất sàn hoặc lỗi trình duyệt (`artifacts/ground-orbit-0.png` đến `-3.png`). Không đổi độ cao/collision/texture hoặc giảm chất lượng cảnh để che lỗi.
+
+## Hoạt động, animation đấm và tượng ngoài vườn
+
+Engine có 14 kiểm tra cho 7 minigame mới, bên cạnh PvP sẵn có. 8 kiểm tra HMAC/PostgreSQL thực thi claim CTE, replay, nhận trùng đồng thời, kỷ lục nhỏ nhất/lớn nhất, quyền đọc và rollback nguyên tử. Hai test clip GLB kiểm tra bone binding, jab/cross và chân không trượt. TypeScript web/Worker, 74 tests và metadata Drizzle đều đạt.
+
+Browser smoke thực sự đi đến hồ, thả câu/giật cá trong cửa sổ server, xác nhận tab khác thấy tư thế/effect, lưu cá/xu/XP vào Neon, gửi lại receipt không cộng thêm, gửi bằng hồ sơ khác nhận 403 và reload vẫn còn bộ sưu tập. Không có page error. Hai hồ sơ QA cùng claims/fish/scores/wallet/prayers liên quan được dọn đúng UUID. Bằng chứng: `artifacts/activities-results.json`, `activities-fishing-online.png`, `activities-saved-collection.png`.
+
+Probe riêng qua Worker public dùng ticket phiên khách thật: đi đến bờ hồ qua giao thức movement, server chọn cá và ký receipt, API Neon nhận thưởng một lần và từ chối replay. Migration 0003 đã áp dụng, Worker đã deploy phiên bản `b4981688-ba39-4bc9-b72a-c92b57b334cb`, asset S3 23 file được xác minh. Các API `/api/game/session`, `/api/game/progress`, `/api/game/claim` đã qua build/đóng gói Netlify và guard output; vẫn dùng công cụ copy symlink Windows đã mô tả ở trên.
+
+Tượng garden giảm 93,59% đỉnh, 96% tam giác, còn 2,14 MB; bản gốc giữ nguyên. Ảnh so sánh front/side và đi bộ đến vườn đã kiểm tra, không có lỗi trang. Clip đấm mới GLB 0 lỗi/0 cảnh báo, tượng 0 lỗi/1 tangent warning. Các ảnh trong `artifacts/punch-*.png`, `garden-statue-*.png` và `activities-*.png`.
+
+## Dọn avatar khi thoát và vào lại
+
+Server xóa session trước khi dọn hoạt động có broadcast, cô lập lỗi gửi/đóng socket và thu hồi transport lỗi ở tick tiếp theo. Gói `leave` xóa avatar ngay khi nhận được; heartbeat 10 giây và lease 60 giây xử lý kết nối treo không phát sự kiện close. Dừng timer cả khi phòng rỗng do leave hoặc lease, không chỉ do transport close. Bản local kiểm tra đúng instance phòng trước khi close muộn xóa room khỏi Map.
+
+Client gửi leave trong cleanup/pagehide, dừng retry/fetch khi rời trang và kết nối lại khi quay về từ BFCache. Mỗi tab có UUID riêng, dùng BroadcastChannel để phát hiện sessionStorage bị nhân bản; chỉ profile đã xác thực bằng ticket cùng UUID tab mới được thay socket cũ. Không gộp người chơi theo tên hoặc cookie. Phòng đầy thử lại sau 15 giây để có thể vào sau khi chỗ treo được thu hồi. Điểm spawn chọn vị trí trống thay vì dựa vào số người còn lại.
+
+10 regression test server kiểm tra lỗi gửi trong lúc dọn hoạt động, close ném lỗi, leave/lệnh đến muộn, lease, pings khi ngồi yên, packet lỗi, socket chưa join, thay phiên, khác tab/hồ sơ, ticket giả, xác thực hoàn tất sau khi rời và spawn 20 người riêng vị trí. 7 test định danh tab kiểm tra reload, tab nhân bản, probe đồng thời, BFCache và storage bị chặn. Tổng TypeScript web/Worker và 91 tests đạt. Chrome thật giữ một observer, đóng/mở lại actor, reload ba lần và đổi phòng hai lần; không tích lũy ID cũ, hai avatar cuối cách nhau trên 1 m. Dữ liệu QA Neon được dọn theo UUID/tên/thời điểm tạo; bằng chứng ở `artifacts/presence-results.json` và `presence-game.png`.
+
+Worker đã deploy phiên bản `79cb8a7c-508d-4afa-ad3c-9044210fe2be`. Probe public với Origin Netlify xác nhận leave xóa ngay, reconnect cùng tab thay socket cũ bằng close 4005, observer cùng profile vẫn ở lại; socket im lặng hết lease 60 giây bị đóng 4002 trong khi observer trả heartbeat tiếp tục kết nối. Probe dùng ticket QA ký tạm, không tạo bản ghi database. Build Netlify cuối hoàn tất adapter/function/guard như quy trình Windows đã mô tả ở trên. Bản web cần push và Netlify deploy lại để nhận lifecycle/định danh tab mới.
 
 ## Phạm vi còn cần đo riêng
 

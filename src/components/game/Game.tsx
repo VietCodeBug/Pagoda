@@ -11,6 +11,8 @@ import HUD from './HUD';
 import Network from './Network';
 import {useGame} from '@/lib/game-store';
 import FrameBudget from './FrameBudget';
+import ActivityWorld from './ActivityWorld';
+import '@/app/activities.css';
 
 class RenderBoundary extends Component<{children:ReactNode},{failed:boolean}> {
   state={failed:false};
@@ -41,6 +43,7 @@ export default function Game(){
             {entered?<Controller/>:<ScenicCamera/>}
           </Physics>
           <OtherPlayers/>
+          <ActivityWorld/>
           {quality==='high'&&<EffectComposer><Bloom luminanceThreshold={1.15} intensity={.45} mipmapBlur/><Vignette eskil={false} offset={.25} darkness={.32}/></EffectComposer>}
         </Suspense>
       </Canvas>

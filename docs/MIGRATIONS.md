@@ -5,6 +5,7 @@
 1. `0000_virtual_temple.sql`: baseline hiện có, tạo bảng/index nếu chưa tồn tại.
 2. `0001_public_prayer_api.sql`: view công khai và quyền đọc cho Data API, giữ bảng hồ sơ/lời riêng ngoài quyền anonymous.
 3. `0002_restore_validation.sql`: khôi phục CHECK avatar 0–3 và độ dài lời nguyện 1–500 nếu bị thiếu. Nếu dữ liệu cũ vi phạm CHECK, migration thất bại để người vận hành xử lý; không tự sửa/xóa dữ liệu.
+4. `0003_game_progress.sql`: bổ sung ví xu/XP, bộ sưu tập cá, thành tích và ledger chống nhận thưởng trùng; không đặt lại dữ liệu. Đã áp dụng lên Neon trong lượt bổ sung hoạt động.
 
 Các file SQL khác, gồm `0000_little_mathemanic.sql` do PR #1 tạo trùng, không được chạy và có cảnh báo. Không merge baseline trùng để giải quyết deploy Netlify. Journal/snapshot trong `drizzle/meta` mô tả schema và thứ tự sinh migration; không có nghĩa database đã thực hiện chúng.
 

@@ -3,6 +3,7 @@ export const MIGRATION_FILES = [
   '0000_virtual_temple.sql',
   '0001_public_prayer_api.sql',
   '0002_restore_validation.sql',
+  '0003_game_progress.sql',
 ] as const;
 
 export function migrationPlan(availableFiles: readonly string[]) {
