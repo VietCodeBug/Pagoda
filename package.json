@@ -18,6 +18,7 @@
     "cf:typecheck": "tsc --noEmit -p tsconfig.worker.json",
     "smoke": "tsx scripts/smoke.ts",
     "test:ui": "node scripts/ui-smoke.mjs",
+    "test:tabs": "node scripts/two-tabs-smoke.mjs",
     "check": "pnpm typecheck && pnpm cf:typecheck && pnpm test",
     "assets:scene": "node scripts/fetch-scene-assets.mjs",
     "storage:upload": "tsx scripts/upload-assets.ts",

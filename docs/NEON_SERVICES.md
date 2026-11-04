@@ -9,7 +9,7 @@ Hướng dẫn cho bản game ngày 04/11/2026. Đăng nhập người chơi v�
 | Hồ sơ, lời nguyện | PostgreSQL qua Drizzle; `DATABASE_URL` hoặc `NEON_KEY` |
 | Model, nhạc | Neon Object Storage, bucket `pagoda`; client gọi `/api/assets/<tên-file>` |
 | Sổ lời nguyện công khai | Neon Realtime SQL, SDK subscribe một truy vấn được server niêm phong |
-| Vị trí, chat phòng, HP | Server phòng WebSocket hiện có; `NEXT_PUBLIC_REALTIME_URL` |
+| Vị trí, chat phòng, HP | Server phòng WebSocket; `REALTIME_URL` hoặc Worker mặc định, alias `NEXT_PUBLIC_REALTIME_URL` |
 
 Neon Realtime SQL không thay thế server quyết định sát thương và hành động trong game. Tọa độ di chuyển không được ghi liên tục vào PostgreSQL.
 
@@ -34,7 +34,7 @@ Giữ giá trị thật trong `.env`/`.env.local` khi chạy local và trong Env
 
 Các tên cũ `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` vẫn được hỗ trợ cho môi trường local. Trên Netlify dùng nhóm `NEON_STORAGE_*`: Netlify Functions có biến AWS dành riêng và không cho ghi đè. Chạy `pnpm env:netlify` để tạo file `.env.netlify` có thể import qua UI; file nằm ngoài Git. Xem [deploy Netlify](DEPLOY_NETLIFY.md).
 
-`NEXT_PUBLIC_REALTIME_URL` là URL **server phòng game** đang chạy bằng Node khi phát triển hoặc Cloudflare Worker khi deploy. Giá trị này khác `NEON_REALTIME_URL`, vốn phục vụ thay đổi dữ liệu trong sổ lời nguyện.
+`REALTIME_URL` là URL **server phòng game**, ưu tiên hơn alias cũ `NEXT_PUBLIC_REALTIME_URL`. `/api/realtime/config` đọc URL ở server lúc chạy; production có Worker mặc định trong `src/lib/realtime-default.json`, local dùng cổng 1999. Giá trị này khác `NEON_REALTIME_URL`, vốn phục vụ thay đổi dữ liệu trong sổ lời nguyện.
 
 ## Model và âm thanh trên S3
 

@@ -44,6 +44,10 @@ function Courtyard() {
       ref.current!.setColorAt(i, new THREE.Color(stone.color));
     });
     ref.current.instanceMatrix.needsUpdate = true;
+    // The first frame can cache origin-only bounds before these instance transforms
+    // are installed. Refresh them so orbiting never culls the whole paved courtyard.
+    ref.current.computeBoundingBox();
+    ref.current.computeBoundingSphere();
     if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
   }, [stones]);
   return <>
@@ -97,6 +101,8 @@ function Roof({ width = 9.6, depth = 8.5, height = 2.5, y = 6.3, z = -12.6, qual
       i++;
     }
     tileRef.current.instanceMatrix.needsUpdate = true;
+    tileRef.current.computeBoundingBox();
+    tileRef.current.computeBoundingSphere();
     if (tileRef.current.instanceColor) tileRef.current.instanceColor.needsUpdate = true;
   }, [width, depth, height, rows, cols]);
   const eaves = useMemo(() => {

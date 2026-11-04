@@ -148,10 +148,10 @@ Các biến chính:
 
 - `DATABASE_URL`: PostgreSQL URL, chỉ server.
 - `SESSION_SECRET`: bí mật ký cookie, chỉ server; ít nhất 32 ký tự khi production.
-- `NEXT_PUBLIC_REALTIME_URL`: URL WebSocket public, không chứa secret.
+- `REALTIME_URL`: URL server phòng public, đọc lúc chạy qua `/api/realtime/config`; alias `NEXT_PUBLIC_REALTIME_URL` vẫn được hỗ trợ. Production mặc định dùng Worker trong `src/lib/realtime-default.json`, local dùng cổng 1999. Không chứa secret.
 - `ALLOWED_ORIGIN`: origin web được phép kết nối Worker.
 
-Deploy web lên Netlify và realtime lên Cloudflare là hai bước riêng. `netlify.toml` dùng `pnpm build` và `.next`, giữ API/cookie trên Next.js adapter. Import `.env.netlify` qua UI với scope Builds và Functions; dùng nhóm `NEON_STORAGE_*` thay tên AWS dành riêng. Sau khi có Worker URL, cấu hình `NEXT_PUBLIC_REALTIME_URL` rồi build/deploy web. Cấu hình origin Worker và Neon Realtime trùng URL web production. HTTPS web phải dùng WSS. Không commit `.env` hoặc dán giá trị secret vào log. Xem [hướng dẫn Netlify](DEPLOY_NETLIFY.md).
+Deploy web lên Netlify và realtime lên Cloudflare là hai bước riêng. `netlify.toml` dùng `pnpm build` và `.next`, giữ API/cookie trên Next.js adapter. Import `.env.netlify` qua UI với scope Builds và Functions; dùng nhóm `NEON_STORAGE_*` thay tên AWS dành riêng. Worker hiện có là mặc định; khi đổi server, cấu hình `REALTIME_URL` trong Functions rồi redeploy web. Cấu hình origin Worker và Neon Realtime trùng URL web production. HTTPS web phải dùng WSS. Không commit `.env` hoặc dán giá trị secret vào log. Xem [hướng dẫn Netlify](DEPLOY_NETLIFY.md).
 
 Worker phiên bản đầu giữ vòng tick khi phòng đang hoạt động (`hibernate = false`), dừng timer sau khi người cuối cùng rời phòng. Snapshot chỉ phát khi trạng thái đổi, tối đa khoảng 10 Hz. Mục tiêu gần 0 đồng phụ thuộc hạn mức, thời gian online, băng thông model và số kết nối. Tối ưu tiếp theo là hibernation sau khi có số đo.
 

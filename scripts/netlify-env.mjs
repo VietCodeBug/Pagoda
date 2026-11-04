@@ -3,9 +3,11 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parse } from 'dotenv';
+import realtimeDefault from '../src/lib/realtime-default.json' with { type: 'json' };
 
 const aliases = {
   DATABASE_URL: 'NEON_KEY',
+  REALTIME_URL: 'NEXT_PUBLIC_REALTIME_URL',
   NEON_STORAGE_ENDPOINT: 'AWS_ENDPOINT_URL_S3',
   NEON_STORAGE_ACCESS_KEY_ID: 'AWS_ACCESS_KEY_ID',
   NEON_STORAGE_SECRET_ACCESS_KEY: 'AWS_SECRET_ACCESS_KEY',
@@ -17,7 +19,7 @@ const keys = [
   'NEON_STORAGE_REGION', 'NEON_STORAGE_BUCKET',
   'NEON_REALTIME_URL', 'NEON_REALTIME_SECRET', 'NEON_REALTIME_DATABASE',
   'NEON_DATA_API_URL', 'NEON_DATA_API_TOKEN', 'NEON_AUTH_URL', 'NEON_JWKS_URL',
-  'NEXT_PUBLIC_REALTIME_URL',
+  'REALTIME_URL', 'NEXT_PUBLIC_REALTIME_URL',
 ];
 const localHost = (host) => host === 'localhost' || host === '[::1]' || /^127\./.test(host);
 
@@ -57,11 +59,14 @@ export function normalizeEnv(source) {
 /** Match runtime precedence: file overrides first, canonical names beat legacy aliases. */
 export function buildExportEnv(sources, previous = {}, roomUrl) {
   const env = canonicalEnv(Object.assign({}, ...sources.map(parseEnvSource)));
-  if (roomUrl) env.NEXT_PUBLIC_REALTIME_URL = roomUrl.trim();
-  else {
-    try { if (localHost(new URL(env.NEXT_PUBLIC_REALTIME_URL).hostname)) delete env.NEXT_PUBLIC_REALTIME_URL; } catch { /* Validator reports malformed nonempty URLs. */ }
-    if (!env.NEXT_PUBLIC_REALTIME_URL && previous.NEXT_PUBLIC_REALTIME_URL) env.NEXT_PUBLIC_REALTIME_URL = previous.NEXT_PUBLIC_REALTIME_URL;
+  let room = roomUrl?.trim() || env.REALTIME_URL;
+  if (!roomUrl) {
+    try { if (localHost(new URL(room).hostname)) room = undefined; } catch { /* Validator reports malformed nonempty URLs. */ }
+    room ||= previous.REALTIME_URL || previous.NEXT_PUBLIC_REALTIME_URL || realtimeDefault.url;
   }
+  try { const parsed = new URL(room); if (parsed.protocol === 'https:') parsed.protocol = 'wss:'; room = parsed.href.replace(/\/$/, ''); } catch { /* Validator reports invalid values without echoing them. */ }
+  env.REALTIME_URL = room;
+  env.NEXT_PUBLIC_REALTIME_URL = room;
   env.SESSION_SECRET ||= previous.SESSION_SECRET;
   return env;
 }
@@ -97,14 +102,16 @@ export function validateEnv(env, requireMultiplayer = false) {
       if (key === 'NEON_STORAGE_ENDPOINT' && url.pathname !== '/') throw new Error();
     } catch { errors.push(`Invalid ${key}`); }
   }
-  if (env.NEXT_PUBLIC_REALTIME_URL) {
+  const roomValue = env.REALTIME_URL || env.NEXT_PUBLIC_REALTIME_URL;
+  const roomKey = env.REALTIME_URL ? 'REALTIME_URL' : 'NEXT_PUBLIC_REALTIME_URL';
+  if (roomValue) {
     try {
-      const url = new URL(env.NEXT_PUBLIC_REALTIME_URL);
+      const url = new URL(roomValue);
       const isNeonSql = url.hostname.includes('.rt.') && url.hostname.endsWith('.neon.tech');
       if (url.protocol !== 'wss:' || localHost(url.hostname) || isNeonSql || url.username || url.password || url.search || url.hash || url.pathname !== '/') throw new Error();
-    } catch { errors.push('NEXT_PUBLIC_REALTIME_URL must be the public wss:// Worker origin, without a room path'); }
+    } catch { errors.push(`${roomKey} must be the public wss:// Worker origin, without a room path`); }
   } else {
-    (requireMultiplayer ? errors : warnings).push('NEXT_PUBLIC_REALTIME_URL is missing: deploy the Cloudflare room server to enable multiplayer');
+    (requireMultiplayer ? errors : warnings).push('REALTIME_URL is missing: export the public Cloudflare room server URL to enable multiplayer');
   }
   if (env.NEON_DATA_API_URL && !env.NEON_DATA_API_TOKEN) warnings.push('Data API has no JWT: PostgreSQL remains active; Neon Auth is not enabled');
   return { errors, warnings };

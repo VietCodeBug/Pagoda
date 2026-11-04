@@ -6,7 +6,7 @@ Ngày 04/11/2026. Node.js 22.20.0 trên Windows. Các lượt đầu dùng Swift
 | --- | --- |
 | `pnpm typecheck` | Đạt |
 | `pnpm cf:typecheck` | Đạt |
-| `pnpm test` | 45/45 đạt: phòng, đường đi, storage/range, public Realtime, env, migration PostgreSQL và output Netlify |
+| `pnpm test` | 50/50 đạt: phòng, đường đi, storage/range, public Realtime, env, migration PostgreSQL, output Netlify và cấu hình online |
 | `pnpm build` | Đạt; game, guest/prayer API, asset route và capability route được build |
 | `pnpm smoke` | Đạt với Next local, Neon thật và hai WebSocket client |
 | Wrangler `deploy --dry-run` | Đạt; không deploy |
@@ -47,7 +47,7 @@ Migration chỉ bổ sung `vto_players`, `vto_prayers` và index. Dữ liệu QA
 
 Lượt chuẩn bị env ban đầu đã qua `pnpm build`, TypeScript web/Worker và 34 bài kiểm tra. Dùng chính `.env.netlify` để kết nối PostgreSQL `SELECT 1`, S3 HEAD xác nhận kích thước avatar và Neon Realtime báo live. Phép thử S3 cố ý gán AWS credential/region giả của nền tảng; cấu hình Neon có tên riêng vẫn được ưu tiên. Build production local nạp file import đã qua API smoke và hai client WebSocket; dữ liệu QA được dọn. Quét bundle client không tìm thấy credential local.
 
-Chưa deploy hay chạy kiểm tra trên hạ tầng Netlify. `NEXT_PUBLIC_REALTIME_URL` còn trống và được cảnh báo rõ; cần URL Worker public để bật multiplayer. Data API chưa có JWT nên tiếp tục dùng PostgreSQL. Auth/JWKS chỉ lưu URL tham khảo, không kích hoạt đăng nhập.
+Ở lượt chuẩn bị env ban đầu chưa có Worker public; việc triển khai và kiểm tra Worker đã được cập nhật trong mục online mặc định bên dưới. Data API chưa có JWT nên tiếp tục dùng PostgreSQL. Auth/JWKS chỉ lưu URL tham khảo, không kích hoạt đăng nhập.
 
 ## Sửa pipeline Netlify và migration sau PR #1
 
@@ -57,9 +57,17 @@ Chưa deploy hay chạy kiểm tra trên hạ tầng Netlify. `NEXT_PUBLIC_REALT
 
 Phép build Netlify được chạy trong bản sao dưới `.wrangler/netlify-validation`. Windows tại máy thử không có quyền tạo POSIX symlink; bản build chuẩn báo EPERM ở bước copy của adapter. Công cụ thử nghiệm chỉ trong `.wrangler` thay copy symlink của handler bằng copy file/junction để chạy tiếp các bước adapter và bundler; code adapter, app và cấu hình gửi Git không bị patch. Đây là bằng chứng kiểm tra artifact/lifecycle trên Windows, không phải kiểm tra runtime Netlify Linux hay số đo dung lượng bundle Linux. Không publish lên host trong lượt sửa này.
 
+## Online mặc định và sân bị biến mất khi xoay camera
+
+Worker `virtual-temple-realtime.phamvietanh19218.workers.dev` đã được người dùng deploy. Kiểm tra public với Origin Netlify thật: health 200/capacity20, hai kết nối có ID riêng, nhận đủ hai người, chat và movement cập nhật qua lại. Test dùng phòng QA riêng, đóng kết nối sau kiểm tra, không tạo hồ sơ Neon.
+
+`pnpm test:tabs` đã qua trên Chrome với hai tab cùng BrowserContext/cookie: cùng hồ sơ khách, hai ID kết nối riêng, cả hai thấy avatar/số người, chat A nhận tại B và di chuyển WASD A xuất hiện trong snapshot B. Không có lỗi trang; đúng một hồ sơ QA và lời nguyện liên quan được dọn theo UUID. Production dùng Worker mặc định qua config API no-store; `REALTIME_URL` cho phép override runtime, alias cũ được giữ. Không báo online trước gói welcome.
+
+Courtyard và roof InstancedMesh đã tính lại boundingBox/boundingSphere sau khi cập nhật ma trận. Tái hiện bằng Three.js cho sân lát đá tại 24 góc: bounds cũ cull sai 21 góc, bounds mới không cull sai góc nào. Bốn ảnh orbit mobile được kiểm tra, không mất sàn hoặc lỗi trình duyệt (`artifacts/ground-orbit-0.png` đến `-3.png`). Không đổi độ cao/collision/texture hoặc giảm chất lượng cảnh để che lỗi.
+
 ## Phạm vi còn cần đo riêng
 
-Chưa xác nhận bản sửa chạy trên production sau khi người dùng push/deploy; chưa benchmark 20 thiết bị cùng lúc, chưa đo FPS/nhiệt/bộ nhớ trên điện thoại thật. Bài kiểm tra 20 chỗ và từ chối người thứ 21 xác nhận luật phòng, không phải benchmark hiệu năng render. Camera và collision dùng hình đơn giản gần với kiến trúc; clip nghi lễ hiện là pose runtime. Better Auth/account-link, moderation và phục hồi room sau deploy nằm trong roadmap.
+Chưa xác nhận bản web mới trên production sau khi người dùng push/deploy; Worker public đã được kiểm tra độc lập. Chưa benchmark 20 thiết bị cùng lúc, chưa đo FPS/nhiệt/bộ nhớ trên điện thoại thật. Bài kiểm tra 20 chỗ và từ chối người thứ 21 xác nhận luật phòng, không phải benchmark hiệu năng render. Camera và collision dùng hình đơn giản gần với kiến trúc; clip nghi lễ hiện là pose runtime. Better Auth/account-link, moderation và phục hồi room sau deploy nằm trong roadmap.
 
 ## Sửa rung khi di chuyển
 

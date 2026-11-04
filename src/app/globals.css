@@ -99,6 +99,7 @@ option { color: #eee7d7; background: #2b4035; }
 .room-badge { position: absolute; top: 105px; left: 47px; display: flex; align-items: center; gap: 7px; color: #e9e4d2cc; font-size: 9px; padding: 8px 11px; background: #20372b70; backdrop-filter: blur(10px); border: 1px solid #e0d4af21; border-radius: 20px; }
 .connection-dot { width: 5px; height: 5px; border-radius: 50%; background: #caac73; }
 .connection-dot.connected { background: #b7d3a7; box-shadow: 0 0 8px #a8cd8550; }
+.connection-retry { display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; padding: 2px; background: transparent; color: #ead6ae; cursor: pointer; }
 .player-card { position: absolute; left: 39px; bottom: 261px; display: flex; align-items: center; gap: 11px; width: 285px; }
 .player-card > div:nth-child(2) { display: flex; flex-direction: column; gap: 5px; }
 .player-card strong { font-family: Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: 400; text-shadow: 0 1px 8px #0009; }
@@ -175,6 +176,10 @@ option { color: #eee7d7; background: #2b4035; }
 .settings-row select { padding: 6px 9px; border: 1px solid #a9af9359; border-radius: 5px; background: #f2edde; font-size: 10px; color: #5e7555; }
 .settings-row option { background: #f2edde; color: #354d34; }
 .settings-note { margin: 20px 0 0; font-size: 9px; color: #959581; line-height: 1.7; }
+.connection-settings { margin-top: 16px; padding: 13px; border-radius: 10px; background: #63795812; color: #52694c; }
+.connection-settings > div { display: flex; align-items: center; gap: 7px; font-size: 11px; }
+.connection-settings p { margin: 7px 0 0; font-size: 10px; line-height: 1.6; }
+.connection-settings button { display: inline-flex; align-items: center; gap: 6px; margin-top: 9px; padding: 6px 10px; border: 1px solid #8a9d7e60; border-radius: 6px; background: transparent; color: inherit; font-size: 10px; cursor: pointer; }
 .map-dialog { width: 460px; }
 .minimap.large { width: 100%; height: auto; aspect-ratio: 1; max-width: 350px; border-radius: 10px; box-shadow: none; border-color: #b3b495; margin: 0 auto; }
 .minimap.large .map-north { top: 13px; font-size: 12px; }

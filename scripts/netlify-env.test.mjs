@@ -31,8 +31,16 @@ describe('Netlify environment import', () => {
   it('retains a previously configured public room URL and guest secret on repeat exports', () => {
     const previous = { SESSION_SECRET: 'existing-session-secret', NEXT_PUBLIC_REALTIME_URL: 'wss://previous.account.workers.dev' };
     const env = buildExportEnv(['NEXT_PUBLIC_REALTIME_URL=ws://localhost:1999\n'], previous);
-    expect(env).toEqual(previous);
+    expect(env).toMatchObject(previous);
+    expect(env.REALTIME_URL).toBe(previous.NEXT_PUBLIC_REALTIME_URL);
     expect(buildExportEnv([], previous, 'wss://new.account.workers.dev').NEXT_PUBLIC_REALTIME_URL).toBe('wss://new.account.workers.dev');
+  });
+  it('uses the public Worker by default and accepts the HTTPS URL printed by Wrangler', () => {
+    expect(buildExportEnv([]).REALTIME_URL).toBe('wss://virtual-temple-realtime.phamvietanh19218.workers.dev');
+    expect(buildExportEnv([], {}, 'https://worker.account.workers.dev/').REALTIME_URL).toBe('wss://worker.account.workers.dev');
+    const env = buildExportEnv(['REALTIME_URL=wss://runtime.account.workers.dev\nNEXT_PUBLIC_REALTIME_URL=wss://old.account.workers.dev']);
+    expect(env.REALTIME_URL).toBe('wss://runtime.account.workers.dev');
+    expect(env.NEXT_PUBLIC_REALTIME_URL).toBe(env.REALTIME_URL);
   });
   it('does not use an unrelated variable named undefined as a fallback for missing keys', () => {
     expect(normalizeEnv('undefined=unrelated-private-secret\n')).toEqual({});
@@ -47,8 +55,8 @@ describe('Netlify environment import', () => {
     const env = { DATABASE_URL: 'invalid-private-password', NEON_STORAGE_ENDPOINT: 'https://user:private-secret@storage.invalid' };
     const normal = validateEnv(env);
     const strict = validateEnv(env, true);
-    expect(normal.warnings.some((line) => line.startsWith('NEXT_PUBLIC_REALTIME_URL'))).toBe(true);
-    expect(strict.errors.some((line) => line.startsWith('NEXT_PUBLIC_REALTIME_URL'))).toBe(true);
+    expect(normal.warnings.some((line) => line.startsWith('REALTIME_URL'))).toBe(true);
+    expect(strict.errors.some((line) => line.startsWith('REALTIME_URL'))).toBe(true);
     expect(JSON.stringify(strict)).not.toContain('private-secret');
     expect(JSON.stringify(strict)).not.toContain('invalid-private-password');
   });

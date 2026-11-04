@@ -55,6 +55,7 @@ Dùng `.env.example` để tham khảo, giữ thông tin thật trong `.env`/`.e
 | `DATABASE_URL` | Server Next.js; chuỗi kết nối Neon. `NEON_KEY` hiện có cũng được hỗ trợ nếu giá trị là chuỗi PostgreSQL. |
 | `SESSION_SECRET` | Server Next.js; ít nhất 32 ký tự ngẫu nhiên. Bắt buộc khi chạy production. |
 | `NEXT_PUBLIC_REALTIME_URL` | URL gốc server phòng: local `ws://localhost:1999`, production `wss://…workers.dev`. |
+| `REALTIME_URL` | URL server phòng đọc lúc chạy qua `/api/realtime/config`, ưu tiên hơn biến legacy phía trên. Production mặc định dùng Worker của dự án trong `src/lib/realtime-default.json`; local dùng cổng 1999. |
 | `ALLOWED_ORIGIN` | Worker Cloudflare; origin chính xác của frontend, gồm `https://`. |
 | `NEON_STORAGE_ENDPOINT`, `NEON_STORAGE_ACCESS_KEY_ID`, `NEON_STORAGE_SECRET_ACCESS_KEY`, `NEON_STORAGE_REGION`, `NEON_STORAGE_BUCKET` | Server/script dùng Neon Object Storage, bucket hiện tại `pagoda`. Code vẫn hỗ trợ tên `AWS_*` cũ khi chạy local. |
 | `NEON_REALTIME_URL`, `NEON_REALTIME_SECRET` | Server niêm phong truy vấn công khai; client nhận quyền đọc có hạn, không nhận secret. |
@@ -77,6 +78,7 @@ pnpm build          # Build frontend production
 pnpm build:netlify  # Chạy Netlify CLI build local, có adapter và kiểm tra output; không deploy
 pnpm smoke          # Cần pnpm dev đang chạy; kiểm tra API/Neon và hai WebSocket client
 pnpm test:ui        # Cần pnpm dev + Chrome đã cài; ảnh kết quả trong artifacts/
+pnpm test:tabs      # Hai tab chung cookie: ID nhân vật riêng, nhìn thấy nhau, chat và di chuyển
 pnpm smoke:neon     # Hai kết nối Neon thật, riêng tư, S3 checksum/range; tự dọn UUID QA
 pnpm realtime:check # Kiểm tra subscription upstream, không in secret
 pnpm exec wrangler deploy --dry-run
@@ -91,12 +93,12 @@ pnpm exec wrangler deploy --dry-run
 1. Chạy `pnpm env:netlify` để tạo `.env.netlify` từ cấu hình local. File có tên biến hợp lệ để import, không chứa dòng URL đứng riêng và không được commit.
 2. Đưa mã nguồn cùng `public/assets` lên GitHub, kết nối repo với Netlify. `netlify.toml` đã cấu hình `pnpm build`, publish `.next`, khai báo adapter Next.js và plugin kiểm tra output. Build sẽ dừng nếu thiếu function/route/bundle/asset hoặc còn publish thư mục server thô.
 3. Import `.env.netlify` trong **Project configuration → Environment variables**, giữ **All scopes** hoặc bao gồm **Builds + Functions**, rồi deploy.
-4. Worker đã có `ALLOWED_ORIGIN=https://bespoke-arithmetic-045314.netlify.app` trong `wrangler.jsonc`; sửa giá trị khi đổi domain. Chạy `pnpm deploy:realtime` sau khi đăng nhập Cloudflare. Đặt URL Worker thật dạng `wss://…workers.dev` vào `NEXT_PUBLIC_REALTIME_URL` trên Netlify và deploy lại.
+4. Worker đã deploy tại `https://virtual-temple-realtime.phamvietanh19218.workers.dev` và cho phép origin `https://bespoke-arithmetic-045314.netlify.app`. Đây là server mặc định của bản production, không cần đổi env nếu dùng site này. Khi đổi server/domain, sửa `ALLOWED_ORIGIN`, deploy Worker, rồi đặt `REALTIME_URL` trong Netlify Functions và redeploy. Biến `NEXT_PUBLIC_REALTIME_URL` cũ vẫn được hỗ trợ.
 5. Thêm domain Netlify vào allowed origins của Neon Realtime. Thử hai trình duyệt cùng phòng trước khi chia sẻ công khai.
 
 Xem [hướng dẫn Netlify từng bước](docs/DEPLOY_NETLIFY.md), gồm tên biến, import env, server multiplayer và xử lý lỗi. Trên Netlify dùng `NEON_STORAGE_*` thay các biến AWS dành riêng. URL Neon Auth/JWKS được đặt tên nhưng game vẫn đăng nhập bằng khách.
 
-Chưa deploy hay tạo tài nguyên trả phí. Mục tiêu chi phí thấp phụ thuộc hạn mức và số người thực tế; không có cam kết 0đ ở mọi tải. Worker dùng phòng đang hoạt động không hibernate, dừng timer khi phòng hết người. Cần theo dõi usage Cloudflare trước khi mở rộng.
+Worker multiplayer đã được người dùng deploy và đã kiểm tra hai kết nối thật. Bản web cần push/deploy lại để nhận code kết nối mới. Mục tiêu chi phí thấp phụ thuộc hạn mức và số người thực tế; không có cam kết 0đ ở mọi tải. Worker dùng phòng đang hoạt động không hibernate, dừng timer khi phòng hết người. Cần theo dõi usage Cloudflare trước khi mở rộng.
 
 ## Tài liệu và cấu trúc
 
